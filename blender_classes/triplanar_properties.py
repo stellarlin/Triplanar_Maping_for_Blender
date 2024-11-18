@@ -37,7 +37,12 @@ class TriplanarProperties(bpy.types.PropertyGroup):
         name="Scale",
         description="",
         default=1.0)
-    
+
+    blending: bpy.props.FloatProperty(
+        name="Scale",
+        description="",
+        default=0.2)
+
     name: bpy.props.StringProperty(
         name="Texture Name",
         description="Name for the created material",
@@ -51,7 +56,10 @@ class TriplanarProperties(bpy.types.PropertyGroup):
         # Create a new material
         material = bpy.data.materials.new(name=self.name)
         material.use_nodes = True
+        # Access the material's node tree
         nodes = material.node_tree.nodes
+        links = material.node_tree.links
+
         nodes.clear()
 
         # Add the necessary nodes
@@ -61,6 +69,7 @@ class TriplanarProperties(bpy.types.PropertyGroup):
         mapping_node = nodes.new(type='ShaderNodeMapping')
         mapping_node.location = (200, 0)
 
+
         separate_xyz_node = nodes.new(type='ShaderNodeSeparateXYZ')
         separate_xyz_node.location = (400, 0)
 
@@ -69,17 +78,24 @@ class TriplanarProperties(bpy.types.PropertyGroup):
         # Add a Material Output node
         output_node = nodes.new(type='ShaderNodeOutputMaterial')
 
-        texture_nodes = [self.create_texture(material, self.texture_x,(600, 200)),
-        self.create_texture(material, self.texture_y, (600, 0)),
-        self.create_texture(material, self.texture_z, (600, -200))]
+        texture_node = self.create_texture(material, self.texture_x,(600, 200))
+        # Set the projection type to 'BOX'
+        texture_node.projection = 'BOX'
+       # texture_nodes = [self.create_texture(material, self.texture_x,(600, 200)),
+        #self.create_texture(material, self.texture_y, (600, 0)),
+       # self.create_texture(material, self.texture_z, (600, -200))]
 
+        # Connect the Texture Coordinate node to the Mapping node
+        links.new(texture_coord_node.outputs['Generated'], mapping_node.inputs['Vector'])
 
+        # Connect the Mapping node to the Texture node
+        links.new(mapping_node.outputs['Vector'], texture_node.inputs['Vector'])
 
         # Connect the combined RGB to the diffuse shader
-        # material.node_tree.links.new(combine_rgb_node.outputs['Color'], diffuse_node.inputs['Color'])
+        links.new(texture_node.outputs['Color'], diffuse_node.inputs['Base Color'])
 
         # Connect the diffuse shader to the material output
-        material.node_tree.links.new(diffuse_node.outputs['BSDF'], output_node.inputs['Surface'])
+        links.new(diffuse_node.outputs['BSDF'], output_node.inputs['Surface'])
 
         print(f"Material '{self.name}' created successfully.")
         return material
