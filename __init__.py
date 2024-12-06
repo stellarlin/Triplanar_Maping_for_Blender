@@ -32,17 +32,18 @@ import bpy
 
 # List of classes to register
 classes = [
-    properties.TriplanarProperties,
-    operator.TriplanarOperator,
-    panel.TriplanarPanel,
+    properties.PlanarMapping_Properties,
+    operator.PlanarMapping_Operator,
+    panel.PlanarMapping_Panel,
 ]
+
 
 def register():
     # Register each class in the list
     for cls in classes:
         bpy.utils.register_class(cls)
 
-    bpy.types.Scene.triplanar_properties = bpy.props.PointerProperty(type=properties.TriplanarProperties)
+    bpy.types.Scene.planar_properties = bpy.props.PointerProperty(type=properties.PlanarMapping_Properties)
 
 
 def unregister():
@@ -51,4 +52,7 @@ def unregister():
         bpy.utils.unregister_class(cls)
 
     # Unregister properties if needed
-    del bpy.types.Scene.triplanar_properties
+    del bpy.types.Scene.planar_properties
+
+if __name__ == "__main__":
+    register()

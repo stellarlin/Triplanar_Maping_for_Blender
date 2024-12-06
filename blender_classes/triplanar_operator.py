@@ -1,35 +1,36 @@
 import bpy
 
 
-class TriplanarOperator(bpy.types.Operator):
-    bl_idname = "object.apply_triplanar_mapping"
-    bl_label = "Apply Triplanar Mapping"
+class PlanarMapping_Operator(bpy.types.Operator):
+    bl_idname = "material.apply_planar"
+    bl_label = "Create Material"
+    bl_description = "Create a new material"
     bl_options = {'REGISTER', 'UNDO'}
 
+
     def execute(self, context):
+        props = context.scene.planar_properties
         # Get the selected object
         obj = context.active_object
+        material = props.create_triplanar_material()
 
-        # Check if the selected object is a mesh
+        if not obj:
+            self.report({'WARNING'}, "No active object selected")
+
         if obj is None or obj.type != 'MESH':
-            self.report({'ERROR'}, "Active object is not a mesh")
+            self.report({'WARNING'}, "Active object is not a mesh")
             return {'CANCELLED'}
 
-        # Get the TriplanarProperties from the scene
-        triplanar_props = context.scene.triplanar_properties
+        # Store the material in a property to reference it later
+        context.scene.created_material = material.name
+        self.report({'INFO'}, f"Material '{material.name}' created successfully")
+        # Check if the selected object is a mesh
 
-        # Create the triplanar material using the properties
-        material = triplanar_props.create_triplanar_material()
+        if obj.data.materials:
+            obj.data.materials[0] = self.material  # Apply to the first slot
+        else:
+            obj.data.materials.append(self.material)  # Add a new slot if none exists
 
-        if material:
-            # Apply the created material to the selected object
-            if obj.data.materials:
-                obj.data.materials[0] = material  # Replace first material
-            else:
-                obj.data.materials.append(material)  # Add material if no existing materials
+        self.report({'INFO'}, f"Applied {self.material.name}")
 
-            self.report({'INFO'}, f"Applied triplanar material: {material.name}")
-            return {'FINISHED'}
-
-        self.report({'ERROR'}, "Failed to create triplanar material.")
-        return {'CANCELLED'}
+        return {"FINISHED"}

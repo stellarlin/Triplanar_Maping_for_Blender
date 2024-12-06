@@ -1,30 +1,42 @@
 import bpy
 
-
-class TriplanarPanel(bpy.types.Panel):
+class PlanarMapping_Panel(bpy.types.Panel):
     bl_label = "Triplanar Mapping"
     bl_idname = "TRIPLANE_MAPPING_PANEL"
     bl_space_type = "VIEW_3D"
     bl_region_type = "UI"
-    bl_category = "Triplane Texture"
+    bl_category = "Triplanar Mapping Panel"
 
     def draw(self, context):
         layout = self.layout
         scene = context.scene
-        triplanar_properties = scene.triplanar_properties
+        prop = scene.planar_properties
 
-        # Texture Inputs for X, Y, and Z axes
-        layout.prop(triplanar_properties, "texture_x")
-        layout.prop(triplanar_properties, "texture_y")
-        layout.prop(triplanar_properties, "texture_z")
+        # Block 1: Create Material Section
+        layout.label(text="Create a New Material:")
 
-        # Scale input for triplanar mapping
-        layout.prop(triplanar_properties, "scale")
+        if prop:
+            # Display properties in the UI
+            layout.prop(prop, "texture")
+            layout.prop(prop, "scale")
+            layout.prop(prop, "blending")
+            layout.prop(prop, "name")
 
-        # Name of the material
-        layout.prop(triplanar_properties, "name")
+            # Button to create material
+            layout.operator("material.apply_planar")
+        else:
+            self.report({'ERROR'}, "No props")
 
-        # Button to apply triplanar mapping
-        layout.operator("object.apply_triplanar_mapping", text="Apply Triplanar Mapping")
+ #       layout.separator()  # Add a separator between blocks
+ #       layout.label(text="Apply Existing Material:")
 
+        # Block 2: Apply Material from Global List
+        # List available materials
+      #  layout.label(text="Available Materials:")
+     #   for mat in bpy.data.materials:
+      #      row = layout.row()
+      #      row.label(text=mat.name)
+      #      # Example of adding a button to assign material to the active object
+      #      row.operator("object.apply_material", text="Apply").material = mat
+#
 
