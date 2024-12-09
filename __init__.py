@@ -33,15 +33,21 @@ import bpy
 # List of classes to register
 classes = [
     properties.PlanarMapping_Properties,
-    operator.PlanarMapping_Operator,
+    operator.Apply_Material_Operator,
+    operator.Update_Material_Operator,
     panel.PlanarMapping_Panel,
 ]
 
 
 def register():
     # Register each class in the list
-    for cls in classes:
-        bpy.utils.register_class(cls)
+    #for cls in classes:
+    #    bpy.utils.register_class(cls)
+
+    bpy.utils.register_class( properties.PlanarMapping_Properties)
+    bpy.utils.register_class(operator.Apply_Material_Operator)
+    bpy.utils.register_class(operator.Update_Material_Operator)
+    bpy.utils.register_class(panel.PlanarMapping_Panel)
 
     bpy.types.Scene.planar_properties = bpy.props.PointerProperty(type=properties.PlanarMapping_Properties)
 

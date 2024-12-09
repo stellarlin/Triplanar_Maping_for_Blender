@@ -1,9 +1,9 @@
 import bpy
 
 
-class PlanarMapping_Operator(bpy.types.Operator):
+class Apply_Material_Operator(bpy.types.Operator):
     bl_idname = "material.apply_planar"
-    bl_label = "Create Material"
+    bl_label = "Apply Material"
     bl_description = "Create a new material"
     bl_options = {'REGISTER', 'UNDO'}
 
@@ -12,7 +12,7 @@ class PlanarMapping_Operator(bpy.types.Operator):
         props = context.scene.planar_properties
         # Get the selected object
         obj = context.active_object
-        material = props.create_triplanar_material()
+        material = props.create_material()
 
         if not obj:
             self.report({'WARNING'}, "No active object selected")
@@ -22,15 +22,26 @@ class PlanarMapping_Operator(bpy.types.Operator):
             return {'CANCELLED'}
 
         # Store the material in a property to reference it later
-        context.scene.created_material = material.name
-        self.report({'INFO'}, f"Material '{material.name}' created successfully")
+        # context.scene.created_material = material.name
+        # self.report({'INFO'}, f"Material '{material.name}' created successfully")
         # Check if the selected object is a mesh
 
         if obj.data.materials:
-            obj.data.materials[0] = self.material  # Apply to the first slot
+            obj.data.materials[0] = material  # Apply to the first slot
         else:
-            obj.data.materials.append(self.material)  # Add a new slot if none exists
+            obj.data.materials.append(material)  # Add a new slot if none exists
 
-        self.report({'INFO'}, f"Applied {self.material.name}")
+        self.report({'INFO'}, f"Applied {material.name}")
 
         return {"FINISHED"}
+
+class Update_Material_Operator(bpy.types.Operator):
+    bl_idname = "material.update_planar"
+    bl_label = "Update Material"
+    bl_description = "Update a material of selected mesh"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        props = context.scene.planar_properties
+        props.update_material(context)  # Trigger the update method
+        return {'FINISHED'}

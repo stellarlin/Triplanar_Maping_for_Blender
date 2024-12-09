@@ -15,17 +15,17 @@ class PlanarMapping_Panel(bpy.types.Panel):
         # Block 1: Create Material Section
         layout.label(text="Create a New Material:")
 
-        if prop:
-            # Display properties in the UI
-            layout.prop(prop, "texture")
-            layout.prop(prop, "scale")
-            layout.prop(prop, "blending")
-            layout.prop(prop, "name")
 
-            # Button to create material
-            layout.operator("material.apply_planar")
-        else:
-            self.report({'ERROR'}, "No props")
+        # Display properties in the UI
+        layout.prop(prop, "texture")
+        layout.prop(prop, "scale")
+        layout.prop(prop, "blending")
+        layout.prop(prop, "name")
+
+        # Button to create material
+        layout.operator("material.apply_planar")
+        layout.operator("material.update_planar")
+
 
  #       layout.separator()  # Add a separator between blocks
  #       layout.label(text="Apply Existing Material:")
