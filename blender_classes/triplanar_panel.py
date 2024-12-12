@@ -1,5 +1,7 @@
 import bpy
 
+from . import triplanar_properties as properties
+
 class PlanarMapping_Panel(bpy.types.Panel):
     bl_label = "Triplanar Mapping"
     bl_idname = "TRIPLANE_MAPPING_PANEL"
@@ -7,36 +9,25 @@ class PlanarMapping_Panel(bpy.types.Panel):
     bl_region_type = "UI"
     bl_category = "Triplanar Mapping Panel"
 
-    def draw(self, context):
-        layout = self.layout
-        scene = context.scene
-        prop = scene.planar_properties
-
-        # Block 1: Create Material Section
-        layout.label(text="Create a New Material:")
-
-
+    def draw_tex_image(self, layout, prop):
         # Display properties in the UI
+        layout.prop(prop, "name")
         layout.prop(prop, "texture")
         layout.prop(prop, "scale")
         layout.prop(prop, "blending")
-        layout.prop(prop, "name")
-
-        # Button to create material
-        layout.operator("material.apply_planar")
-        layout.operator("material.update_planar")
 
 
- #       layout.separator()  # Add a separator between blocks
- #       layout.label(text="Apply Existing Material:")
+    def draw(self, context):
+        layout = self.layout
+        scene = context.scene
 
-        # Block 2: Apply Material from Global List
-        # List available materials
-      #  layout.label(text="Available Materials:")
-     #   for mat in bpy.data.materials:
-      #      row = layout.row()
-      #      row.label(text=mat.name)
-      #      # Example of adding a button to assign material to the active object
-      #      row.operator("object.apply_material", text="Apply").material = mat
-#
+        # Block 1: Create Material Section
+        layout.label(text="Create a New Material:")
+        layout.prop(scene, "texture_type")
 
+        if scene.texture_type == 'TEX_IMAGE':
+            self.draw_tex_image(layout, scene.image_properties)
+
+        if scene.texture_type != 'NONE':
+            layout.operator("material.apply_planar")
+            layout.operator("material.update_planar")

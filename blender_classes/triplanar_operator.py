@@ -9,7 +9,11 @@ class Apply_Material_Operator(bpy.types.Operator):
 
 
     def execute(self, context):
-        props = context.scene.planar_properties
+        if context.scene.texture_type == 'TEX_IMAGE':
+            props = context.scene.image_properties
+      #  elif context.scene.texture_type == 'NOISE':
+      #      props = context.scene.noise_properties
+
         # Get the selected object
         obj = context.active_object
         material = props.create_material()
@@ -42,6 +46,10 @@ class Update_Material_Operator(bpy.types.Operator):
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
-        props = context.scene.planar_properties
+        if context.scene.texture_type == 'TEX_IMAGE':
+            props = context.scene.image_properties
+     #   elif context.scene.texture_type == 'NOISE':
+     #       props = context.scene.noise_properties
+
         props.update_material(context)  # Trigger the update method
         return {'FINISHED'}

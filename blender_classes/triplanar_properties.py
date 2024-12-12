@@ -1,33 +1,20 @@
 import os
 import bpy
 
-class PlanarMapping_Properties(bpy.types.PropertyGroup):
-    texture: bpy.props.StringProperty(
-        name = "Texture",
-        description = "Texture for x label",
-        subtype = 'FILE_PATH')
 
-    scale: bpy.props.FloatVectorProperty(
-        name="Scale",
-        description="Scale along X, Y, Z axes",
-        default=(0.2, 0.2, 0.2),  # Default scale
-        min=0.0,  # Minimum allowed value
-        max=3.0,  # Maximum allowed value
-        size=3,  # Number of components (X, Y, Z)
-        subtype='XYZ'  # Display subtype for UI
-    )
 
-    blending: bpy.props.FloatProperty(
-        name="Blending",
-        description="",
-        default=0.2
-        )
+class TriplanarMapping_Properties( bpy.types.PropertyGroup):
+
 
     name: bpy.props.StringProperty(
-        name="Texture Name",
+        name="Name",
         description="Name for the created material",
         default="DefaultPlanar_Material")  # Default name if no name is provided
 
+
+    def create_texture(self, nodes):
+        # This method should be implemented by subclasses.
+        return nodes.new(type='ShaderNodeTexImage')
 
 
     def create_material(self):
@@ -52,11 +39,7 @@ class PlanarMapping_Properties(bpy.types.PropertyGroup):
         mapping_node = nodes.new(type='ShaderNodeMapping')
         mapping_node.location = (200, 0)
 
-        #mapping_node.inputs['Scale'].default_value  = self.scale
         mapping_node.inputs['Scale'].default_value = self.scale
-
-        texture_node = material.node_tree.nodes.new(type='ShaderNodeTexImage')
-        texture_node.location = (400, 0)
 
         # Add a Diffuse BSDF shader
         principled_node = nodes.new(type='ShaderNodeBsdfPrincipled')
@@ -65,21 +48,7 @@ class PlanarMapping_Properties(bpy.types.PropertyGroup):
         output_node = nodes.new(type='ShaderNodeOutputMaterial')
         output_node.location = (1100, 0)
 
-        if os.path.isfile(bpy.path.abspath(self.texture)):
-            try:
-                texture_node.image = bpy.data.images.load(bpy.path.abspath(self.texture))
-                print(f"Loaded texture from {texture_node}")
-
-            except Exception as e:
-                print(f"Failed to load texture {self.texture}: {e}. Using default white texture.")
-
-        else:
-            print(f"Warning: Texture file not found at {self.texture}.Using default texture")
-
-        texture_node.projection = 'BOX'     # Set the projection type to 'BOX'
-        texture_node.projection_blend = self.blending
-
-        texture_node.interpolation = 'Linear'
+        texture_node = self.create_texture(nodes)
 
         # Connect the Texture Coordinate node to the Mapping node
         links.new(texture_coord_node.outputs['Generated'], mapping_node.inputs['Vector'])
@@ -96,7 +65,70 @@ class PlanarMapping_Properties(bpy.types.PropertyGroup):
         print(f"Material '{self.name}' created successfully.")
         return material
 
+
     def update_material(self, context):
+        # Get the active material
+        material = context.object.active_material
+
+        if not material:
+            print(f"No active material found.")
+            return
+
+        # Ensure the material has a node tree
+        if not material.use_nodes or not material.node_tree:
+            print(f"Material does not use nodes.")
+            return
+
+        material.name = self.name
+
+
+class TextureImage_Properties(TriplanarMapping_Properties):
+
+    texture: bpy.props.StringProperty(
+        name = "Texture",
+        description = "Texture for x label",
+        subtype = 'FILE_PATH')
+
+    scale: bpy.props.FloatVectorProperty(
+        name="Scale",
+        description="Scale along X, Y, Z axes",
+        default=(0.2, 0.2, 0.2),  # Default scale
+        min=0.0,  # Minimum allowed value
+        max=3.0,  # Maximum allowed value
+        size=3,  # Number of components (X, Y, Z)
+        subtype='XYZ'  # Display subtype for UI
+    )
+
+    blending: bpy.props.FloatProperty(
+        name="Blending",
+        description="",
+        default=0.2
+        )
+
+    def create_texture(self, nodes):
+        texture_node = nodes.new(type='ShaderNodeTexImage')
+        if os.path.isfile(bpy.path.abspath(self.texture)):
+            try:
+                texture_node.image = bpy.data.images.load(bpy.path.abspath(self.texture))
+                print(f"Loaded texture from {texture_node}")
+
+            except Exception as e:
+                print(f"Failed to load texture {self.texture}: {e}. Using default white texture.")
+
+        else:
+            print(f"Warning: Texture file not found at {self.texture}.Using default texture")
+
+        texture_node.projection = 'BOX'  # Set the projection type to 'BOX'
+        texture_node.projection_blend = self.blending
+        texture_node.interpolation = 'Linear'
+        texture_node.location = (400, 0)
+
+        return texture_node
+
+    def update_material(self, context):
+
+        super().update_material(context)
+
         # Get the active material
         material = context.object.active_material
 
@@ -129,4 +161,3 @@ class PlanarMapping_Properties(bpy.types.PropertyGroup):
         # Modify the Blend property
         texture_node.projection_blend = self.blending
         mapping_node.inputs['Scale'].default_value = self.scale
-

@@ -32,7 +32,7 @@ import bpy
 
 # List of classes to register
 classes = [
-    properties.PlanarMapping_Properties,
+    properties.TriplanarMapping_Properties,
     operator.Apply_Material_Operator,
     operator.Update_Material_Operator,
     panel.PlanarMapping_Panel,
@@ -44,21 +44,44 @@ def register():
     #for cls in classes:
     #    bpy.utils.register_class(cls)
 
-    bpy.utils.register_class( properties.PlanarMapping_Properties)
+    bpy.utils.register_class(properties.TriplanarMapping_Properties)
+    bpy.utils.register_class(properties.TextureImage_Properties)
+    #bpy.utils.register_class(properties.Noise_Properties)
+
     bpy.utils.register_class(operator.Apply_Material_Operator)
     bpy.utils.register_class(operator.Update_Material_Operator)
     bpy.utils.register_class(panel.PlanarMapping_Panel)
 
-    bpy.types.Scene.planar_properties = bpy.props.PointerProperty(type=properties.PlanarMapping_Properties)
+    bpy.types.Scene.texture_type = bpy.props.EnumProperty(
+        name="Type",
+        description="Choose a type",
+        items=[
+            ('NONE', "-", "No type selected"),
+            ('TEX_IMAGE', "Image", "Settings for Texture Image"),
+            ('NOISE', "Noise", "Settings for Noise"),
+        ],
+        default='NONE'
+    )
+    bpy.types.Scene.image_properties = bpy.props.PointerProperty(type=properties.TextureImage_Properties)
+  #  bpy.types.Scene.noise_properties = bpy.props.PointerProperty(type=properties.Noise_Properties)
 
 
 def unregister():
     # Unregister each class in the list
-    for cls in reversed(classes):
-        bpy.utils.unregister_class(cls)
+   # for cls in reversed(classes):
+   #     bpy.utils.unregister_class(cls)
+
+    bpy.utils.unregister_class(properties.TriplanarMapping_Properties)
+    bpy.utils.unregister_class(properties.TextureImage_Properties)
+  #  bpy.utils.uregister_class(properties.Noise_Properties)
+
+    bpy.utils.unregister_class(operator.Apply_Material_Operator)
+    bpy.utils.unregister_class(operator.Update_Material_Operator)
+    bpy.utils.unregister_class(panel.PlanarMapping_Panel)
 
     # Unregister properties if needed
-    del bpy.types.Scene.planar_properties
+    del bpy.types.Scene.image_properties
+ #   del bpy.types.Scene.noise_properties
 
 if __name__ == "__main__":
     register()
