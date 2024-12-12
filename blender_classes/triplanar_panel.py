@@ -1,6 +1,5 @@
 import bpy
 
-from . import triplanar_properties as properties
 
 class PlanarMapping_Panel(bpy.types.Panel):
     bl_label = "Triplanar Mapping"

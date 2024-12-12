@@ -11,6 +11,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+
 bl_info = {
     "name": "Triplane Texture Mapping",
     "author": "Sofiia Prykhach",
@@ -26,6 +27,8 @@ bl_info = {
 from .blender_classes import triplanar_properties as properties
 from .blender_classes import triplanar_operator as operator
 from .blender_classes import triplanar_panel as panel
+from .blender_classes.TextureImage_Properties import TextureImage_Properties
+
 import bpy
 
 #auto_load.init()
@@ -45,7 +48,7 @@ def register():
     #    bpy.utils.register_class(cls)
 
     bpy.utils.register_class(properties.TriplanarMapping_Properties)
-    bpy.utils.register_class(properties.TextureImage_Properties)
+    bpy.utils.register_class(TextureImage_Properties)
     #bpy.utils.register_class(properties.Noise_Properties)
 
     bpy.utils.register_class(operator.Apply_Material_Operator)
@@ -62,7 +65,7 @@ def register():
         ],
         default='NONE'
     )
-    bpy.types.Scene.image_properties = bpy.props.PointerProperty(type=properties.TextureImage_Properties)
+    bpy.types.Scene.image_properties = bpy.props.PointerProperty(type=TextureImage_Properties)
   #  bpy.types.Scene.noise_properties = bpy.props.PointerProperty(type=properties.Noise_Properties)
 
 
@@ -72,7 +75,7 @@ def unregister():
    #     bpy.utils.unregister_class(cls)
 
     bpy.utils.unregister_class(properties.TriplanarMapping_Properties)
-    bpy.utils.unregister_class(properties.TextureImage_Properties)
+    bpy.utils.unregister_class(TextureImage_Properties)
   #  bpy.utils.uregister_class(properties.Noise_Properties)
 
     bpy.utils.unregister_class(operator.Apply_Material_Operator)
