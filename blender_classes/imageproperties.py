@@ -1,8 +1,8 @@
-from .triplanar_properties import TriplanarMapping_Properties
+from .triplanar_properties import TriplanarMappingProperties
 import bpy
 import os
 
-class TextureImage_Properties(TriplanarMapping_Properties):
+class ImageProperties(TriplanarMappingProperties):
 
     texture: bpy.props.StringProperty(
         name = "Texture",
@@ -25,12 +25,29 @@ class TextureImage_Properties(TriplanarMapping_Properties):
         default=0.2
         )
 
-    my_color_ramp: bpy.props.PointerProperty(
-        type=bpy.types.ColorRamp,
-        name="Color Ramp"
-    )
+    def create_inputs(self, nodes):
+        inputs = nodes.new('NodeGroupInput')
+        inputs.location = (-350, 0)
 
-    def create_texture(self, nodes):
+        mapping_scale_input = inputs.new("NodeSocketVector", "Mapping Scale")
+        mapping_scale_input.default_value = self.scale
+
+        blend_input = inputs.new("NodeSocketFloat", "Texture Blend")
+        blend_input.default_value = self.blending
+
+        return inputs
+
+    def create_outputs(self, nodes):
+        outputs = nodes.new('NodeGroupOutput')
+        outputs.location = (1100, 0)
+        outputs.new("NodeSocketShader", "BSDF")
+        return outputs
+
+    def link_inputs(self, inputs, links, mapping_node, texture_node):
+        links.new(inputs['Scale'], mapping_node.inputs['Scale'])
+        return
+
+    def create_texture(self, nodes, material):
         texture_node = nodes.new(type='ShaderNodeTexImage')
         if os.path.isfile(bpy.path.abspath(self.texture)):
             try:
@@ -48,7 +65,22 @@ class TextureImage_Properties(TriplanarMapping_Properties):
         texture_node.interpolation = 'Linear'
         texture_node.location = (400, 0)
 
+        # Add a driver to the 'Blend' property
+        driver = texture_node.inputs["Blend"].driver_add("default_value").driver
+        driver.type = 'SUM'
+
+        # Add a variable to the driver
+        var = driver.variables.new()
+        var.name = "group_input"
+        var.type = 'SINGLE_PROP'
+
+        # Set the target for the variable
+        target = var.targets[0]
+        target.id = material  # Reference the material
+        target.data_path = 'node_tree.nodes["Group"].inputs["Blend"].default_value'
+
         return texture_node
+
 
     def update_material(self, context):
 

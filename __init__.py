@@ -27,7 +27,7 @@ bl_info = {
 from .blender_classes import triplanar_properties as properties
 from .blender_classes import triplanar_operator as operator
 from .blender_classes import triplanar_panel as panel
-from .blender_classes.TextureImage_Properties import TextureImage_Properties
+from .blender_classes.imageproperties import ImageProperties
 
 import bpy
 
@@ -35,10 +35,9 @@ import bpy
 
 # List of classes to register
 classes = [
-    properties.TriplanarMapping_Properties,
-    operator.Apply_Material_Operator,
-    operator.Update_Material_Operator,
-    panel.PlanarMapping_Panel,
+    properties.TriplanarMappingProperties,
+    operator.ApplyMaterialOperator,
+    panel.PlanarMappingPanel,
 ]
 
 
@@ -47,13 +46,12 @@ def register():
     #for cls in classes:
     #    bpy.utils.register_class(cls)
 
-    bpy.utils.register_class(properties.TriplanarMapping_Properties)
-    bpy.utils.register_class(TextureImage_Properties)
+    bpy.utils.register_class(properties.TriplanarMappingProperties)
+    bpy.utils.register_class(ImageProperties)
     #bpy.utils.register_class(properties.Noise_Properties)
 
-    bpy.utils.register_class(operator.Apply_Material_Operator)
-    bpy.utils.register_class(operator.Update_Material_Operator)
-    bpy.utils.register_class(panel.PlanarMapping_Panel)
+    bpy.utils.register_class(operator.ApplyMaterialOperator)
+    bpy.utils.register_class(panel.PlanarMappingPanel)
 
     bpy.types.Scene.texture_type = bpy.props.EnumProperty(
         name="Type",
@@ -65,8 +63,8 @@ def register():
         ],
         default='NONE'
     )
-    bpy.types.Scene.image_properties = bpy.props.PointerProperty(type=TextureImage_Properties)
-  #  bpy.types.Scene.noise_properties = bpy.props.PointerProperty(type=properties.Noise_Properties)
+    bpy.types.Scene.image_properties = bpy.props.PointerProperty(type=ImageProperties)
+    #bpy.types.Scene.noise_properties = bpy.props.PointerProperty(type=properties.Noise_Properties)
 
 
 def unregister():
@@ -74,13 +72,12 @@ def unregister():
    # for cls in reversed(classes):
    #     bpy.utils.unregister_class(cls)
 
-    bpy.utils.unregister_class(properties.TriplanarMapping_Properties)
-    bpy.utils.unregister_class(TextureImage_Properties)
+    bpy.utils.unregister_class(properties.TriplanarMappingProperties)
+    bpy.utils.unregister_class(ImageProperties)
   #  bpy.utils.uregister_class(properties.Noise_Properties)
 
-    bpy.utils.unregister_class(operator.Apply_Material_Operator)
-    bpy.utils.unregister_class(operator.Update_Material_Operator)
-    bpy.utils.unregister_class(panel.PlanarMapping_Panel)
+    bpy.utils.unregister_class(operator.ApplyMaterialOperator)
+    bpy.utils.unregister_class(panel.PlanarMappingPanel)
 
     # Unregister properties if needed
     del bpy.types.Scene.image_properties

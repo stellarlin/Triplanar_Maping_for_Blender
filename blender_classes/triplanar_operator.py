@@ -1,16 +1,20 @@
 import bpy
 
 
-class Apply_Material_Operator(bpy.types.Operator):
+def choose_properties(context):
+    if context.scene.texture_type == 'TEX_IMAGE':
+        return context.scene.image_properties
+
+
+class ApplyMaterialOperator(bpy.types.Operator):
     bl_idname = "material.apply_planar"
     bl_label = "Apply Material"
     bl_description = "Create a new material"
     bl_options = {'REGISTER', 'UNDO'}
 
-
     def execute(self, context):
-        if context.scene.texture_type == 'TEX_IMAGE':
-            props = context.scene.image_properties
+        props = self.choose_propeties(context)
+
       #  elif context.scene.texture_type == 'NOISE':
       #      props = context.scene.noise_properties
 
@@ -38,18 +42,3 @@ class Apply_Material_Operator(bpy.types.Operator):
         self.report({'INFO'}, f"Applied {material.name}")
 
         return {"FINISHED"}
-
-class Update_Material_Operator(bpy.types.Operator):
-    bl_idname = "material.update_planar"
-    bl_label = "Update Material"
-    bl_description = "Update a material of selected mesh"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    def execute(self, context):
-        if context.scene.texture_type == 'TEX_IMAGE':
-            props = context.scene.image_properties
-     #   elif context.scene.texture_type == 'NOISE':
-     #       props = context.scene.noise_properties
-
-        props.update_material(context)  # Trigger the update method
-        return {'FINISHED'}

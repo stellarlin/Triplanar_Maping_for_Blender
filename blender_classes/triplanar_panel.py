@@ -1,7 +1,7 @@
 import bpy
 
 
-class PlanarMapping_Panel(bpy.types.Panel):
+class PlanarMappingPanel(bpy.types.Panel):
     bl_label = "Triplanar Mapping"
     bl_idname = "TRIPLANE_MAPPING_PANEL"
     bl_space_type = "VIEW_3D"
@@ -14,6 +14,7 @@ class PlanarMapping_Panel(bpy.types.Panel):
         layout.prop(prop, "texture")
         layout.prop(prop, "scale")
         layout.prop(prop, "blending")
+
 
 
     def draw(self, context):
@@ -29,4 +30,3 @@ class PlanarMapping_Panel(bpy.types.Panel):
 
         if scene.texture_type != 'NONE':
             layout.operator("material.apply_planar")
-            layout.operator("material.update_planar")
