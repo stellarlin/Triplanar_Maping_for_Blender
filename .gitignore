@@ -1,0 +1,53 @@
+# Python compiled files
+*.pyc
+*.pyo
+__pycache__/
+
+# Blender specific
+*.blend1
+*.blend2
+*.blend@
+*.blend~
+*.blend
+
+# Blender temp files
+*.crash
+*.swp
+*.tmp
+*.temp
+
+# Backup or temporary files
+*.bak
+*.old
+*.orig
+*.log
+
+# IDE specific files
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# MacOS specific files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows specific files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux specific files
+*~
+
+# Environment files
+.env
+*.venv
+.venv/
+
+# Add-on zips (if exporting add-ons)
+*.zip
+
+# Other
+log.txt
