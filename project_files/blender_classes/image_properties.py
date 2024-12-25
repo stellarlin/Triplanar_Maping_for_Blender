@@ -67,6 +67,20 @@ class ImageProperties(TriplanarMappingProperties):
         texture_node.interpolation = 'Linear'
         texture_node.location = (400, 0)
 
+        # Create a driver for the procedural_blend property
+
+        driver = texture_node.driver_add('projection_blend').driver
+
+        # Set up the driver type and target
+        driver.type = 'SUM'
+        var = driver.variables.new()
+        var.name = "blend"  # Name of the driver variable
+        var.type = 'SINGLE_PROP'
+
+        # Target the Value node's output (node output or specific property)
+        var.targets[0].id_type = 'MATERIAL'
+        var.targets[0].id = material  # The Value node is the driver source
+        var.targets[0].data_path = "node_tree.nodes[\"Group\"].inputs[\"Texture Blend\"].default_value"  # The value input/output property
 
         return texture_node
 
