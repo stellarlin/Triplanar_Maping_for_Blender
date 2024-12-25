@@ -25,27 +25,29 @@ class ImageProperties(TriplanarMappingProperties):
         default=0.2
         )
 
-    def create_inputs(self, nodes):
-        inputs = nodes.new('NodeGroupInput')
-        inputs.location = (-350, 0)
+    def create_inputs(self, group):
+        group.interface.new_socket(
+            name='Mapping Scale',
+            in_out='INPUT',
+            socket_type='NodeSocketVector'
+        )
+        group.interface.items_tree['Mapping Scale'].subtype = 'XYZ'
+        group.interface.items_tree['Mapping Scale'].default_value = self.scale
 
-        mapping_scale_input = inputs.new("NodeSocketVector", "Mapping Scale")
-        mapping_scale_input.default_value = self.scale
 
-        blend_input = inputs.new("NodeSocketFloat", "Texture Blend")
-        blend_input.default_value = self.blending
+        group.interface.new_socket(
+            name='Texture Blend',
+            in_out='INPUT',
+            socket_type='NodeSocketFloat'
+        )
 
-        return inputs
+        group.interface.items_tree['Texture Blend'].min_value = 0.0
+        group.interface.items_tree['Texture Blend'].max_value = 1.0
+        group.interface.items_tree['Texture Blend'].default_value = self.blending
 
-    def create_outputs(self, nodes):
-        outputs = nodes.new('NodeGroupOutput')
-        outputs.location = (1100, 0)
-        outputs.new("NodeSocketShader", "BSDF")
-        return outputs
-
-    def link_inputs(self, inputs, links, mapping_node, texture_node):
-        links.new(inputs['Scale'], mapping_node.inputs['Scale'])
-        return
+        # def link_inputs(self, group, links, mapping_node, texture_node):
+  #      links.new(group.inputs['Scale'], mapping_node.inputs['Scale'])
+   #     return
 
     def create_texture(self, nodes, material):
         texture_node = nodes.new(type='ShaderNodeTexImage')
@@ -65,19 +67,6 @@ class ImageProperties(TriplanarMappingProperties):
         texture_node.interpolation = 'Linear'
         texture_node.location = (400, 0)
 
-        # Add a driver to the 'Blend' property
-        driver = texture_node.inputs["Blend"].driver_add("default_value").driver
-        driver.type = 'SUM'
-
-        # Add a variable to the driver
-        var = driver.variables.new()
-        var.name = "group_input"
-        var.type = 'SINGLE_PROP'
-
-        # Set the target for the variable
-        target = var.targets[0]
-        target.id = material  # Reference the material
-        target.data_path = 'node_tree.nodes["Group"].inputs["Blend"].default_value'
 
         return texture_node
 
