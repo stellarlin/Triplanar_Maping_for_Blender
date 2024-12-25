@@ -27,7 +27,7 @@ bl_info = {
 from .blender_classes import triplanar_properties as properties
 from .blender_classes import triplanar_operator as operator
 from .blender_classes import triplanar_panel as panel
-from .blender_classes.imageproperties import ImageProperties
+from .blender_classes.image_properties import ImageProperties
 
 import bpy
 
