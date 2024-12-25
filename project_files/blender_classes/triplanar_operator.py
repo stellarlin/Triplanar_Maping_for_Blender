@@ -1,9 +1,7 @@
 import bpy
 
 
-def choose_properties(context):
-    if context.scene.texture_type == 'TEX_IMAGE':
-        return context.scene.image_properties
+
 
 
 class ApplyMaterialOperator(bpy.types.Operator):
@@ -12,8 +10,12 @@ class ApplyMaterialOperator(bpy.types.Operator):
     bl_description = "Create a new material"
     bl_options = {'REGISTER', 'UNDO'}
 
+    def choose_properties(self, context):
+        if context.scene.texture_type == 'TEX_IMAGE':
+            return context.scene.image_properties
+
     def execute(self, context):
-        props = self.choose_propeties(context)
+        props = self.choose_properties(context)
 
       #  elif context.scene.texture_type == 'NOISE':
       #      props = context.scene.noise_properties
