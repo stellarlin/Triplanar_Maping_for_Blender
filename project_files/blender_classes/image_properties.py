@@ -45,9 +45,9 @@ class ImageProperties(TriplanarMappingProperties):
         group.interface.items_tree['Texture Blend'].max_value = 1.0
         group.interface.items_tree['Texture Blend'].default_value = self.blending
 
-        # def link_inputs(self, group, links, mapping_node, texture_node):
-  #      links.new(group.inputs['Scale'], mapping_node.inputs['Scale'])
-   #     return
+    def link_inputs(self, links, input_node, mapping_node, texture_node):
+        links.new(input_node.outputs['Mapping Scale'], mapping_node.inputs['Scale'])
+        return
 
     def create_texture(self, nodes, material):
         texture_node = nodes.new(type='ShaderNodeTexImage')

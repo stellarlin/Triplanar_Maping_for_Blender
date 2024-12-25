@@ -23,12 +23,12 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
             socket_type='NodeSocketShader'
     )
 
- #   def link_inputs(self, group, links, mapping_node, texture_node):
- #       return
+    def link_inputs(self, links, input_node, mapping_node, texture_node):
+        return
 
-  #  def link_outputs(self, group, links, bsdf_node):
-  #      links.new(group.outputs['BSDF'], bsdf_node.inputs["Color"])
-  #      return
+    def link_outputs(self, links, output_node,  bsdf_node):
+        links.new(output_node.inputs['BSDF'], bsdf_node.outputs["BSDF"])
+        return
 
     def create_group (self,  material):
 
@@ -38,35 +38,39 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
 
         # Add inputs
         self.create_inputs(node_group)
-        nodes.new(type='NodeGroupInput')
+        input_node = nodes.new(type='NodeGroupInput')
+        input_node.location = (-350, 0)
+
 
         # Add outputs
-       # self.create_outputs(node_group)
+        self.create_outputs(node_group)
+        output_node = nodes.new(type='NodeGroupOutput')
+        output_node.location = (1100, 0)
 
         # Add the necessary node
         # TextureCoordinate
-       # texture_coord_node = nodes.new(type='ShaderNodeTexCoord')
-       # texture_coord_node.location = (0, 0)
+        texture_coord_node = nodes.new(type='ShaderNodeTexCoord')
+        texture_coord_node.location = (0, 0)
 
         # Mapping
-       # mapping_node = nodes.new(type='ShaderNodeMapping')
-      #  mapping_node.location = (200, 0)
+        mapping_node = nodes.new(type='ShaderNodeMapping')
+        mapping_node.location = (200, 0)
 
         # Add a Diffuse BSDF shader
-      #  bsdf_node = nodes.new(type='ShaderNodeBsdfPrincipled')
-      #  bsdf_node.location = (800, 0)
+        bsdf_node = nodes.new(type='ShaderNodeBsdfPrincipled')
+        bsdf_node.location = (800, 0)
 
-       # texture_node = self.create_texture(nodes, material)
+        texture_node = self.create_texture(nodes, material)
 
         # Connect the Texture Coordinate node to the Mapping node
-      #  links.new(texture_coord_node.outputs['Generated'], mapping_node.inputs['Vector'])
+        links.new(texture_coord_node.outputs['Generated'], mapping_node.inputs['Vector'])
         # Connect the Mapping node to the Texture node
-   #     links.new(mapping_node.outputs['Vector'], texture_node.inputs['Vector'])
+        links.new(mapping_node.outputs['Vector'], texture_node.inputs['Vector'])
         # Connect the combined RGB to the diffuse shader
-    #    links.new(texture_node.outputs['Color'], BSDF_node.inputs['Base Color'])
+        links.new(texture_node.outputs['Color'], bsdf_node.inputs['Base Color'])
 
-     #   self.link_outputs(node_group, links, bsdf_node)
-     #   self.link_inputs(node_group, links, mapping_node, texture_node)
+        self.link_outputs(links, output_node, bsdf_node)
+        self.link_inputs(links, input_node, mapping_node, texture_node)
         return node_group
 
     def create_material(self):
@@ -89,10 +93,10 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
 
         # Add a Material Output node
         output_node = nodes.new(type='ShaderNodeOutputMaterial')
-        output_node.location = (800, 0)
+        output_node.location = (400, 0)
 
         # Connect the diffuse shader to the material output
-        #links.new(node_group.outputs['BSDF'], output_node.inputs['Surface'])
+        links.new(node_group.outputs['BSDF'], output_node.inputs['Surface'])
 
         print(f"Material '{self.name}' created successfully.")
         return material
