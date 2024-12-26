@@ -43,6 +43,7 @@ class ImageProperties(TriplanarMappingProperties):
 
         group.interface.items_tree['Texture Blend'].min_value = 0.0
         group.interface.items_tree['Texture Blend'].max_value = 1.0
+        group.interface.items_tree['Texture Blend'].subtype = 'FACTOR'
         group.interface.items_tree['Texture Blend'].default_value = self.blending
 
     def link_inputs(self, links, input_node, mapping_node, texture_node):
@@ -65,7 +66,6 @@ class ImageProperties(TriplanarMappingProperties):
         texture_node.projection = 'BOX'  # Set the projection type to 'BOX'
         texture_node.projection_blend = self.blending
         texture_node.interpolation = 'Linear'
-        texture_node.location = (400, 0)
 
         # Create a driver for the procedural_blend property
 
