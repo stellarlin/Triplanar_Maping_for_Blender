@@ -1,6 +1,5 @@
 from .triplanar_properties import TriplanarMappingProperties
 import bpy
-import os
 
 class ColorPositionPair(bpy.types.PropertyGroup):
     color: bpy.props.FloatVectorProperty(
@@ -19,8 +18,8 @@ class ColorPositionPair(bpy.types.PropertyGroup):
 
 class PartialProperties(TriplanarMappingProperties):
 
-    scale: bpy.props.FloatVectorProperty(
-        name ="Texture Scale",
+    scale: bpy.props.FloatProperty(
+        name ="Scale",
         description ="Scale of the texture",
         min = -1000,  # Minimum allowed value
         max = 1000,  # Maximum allowed value
@@ -46,7 +45,7 @@ class PartialProperties(TriplanarMappingProperties):
         group.interface.new_socket(
             name=f"Color position {number}",
             in_out='INPUT',
-            socket_type='NodeSocketVector',
+            socket_type='NodeSocketFloat',
             parent = panel
         )
 
@@ -78,8 +77,8 @@ class PartialProperties(TriplanarMappingProperties):
             parent = texture_panel
         )
         group.interface.items_tree['Scale'].default_value = self.scale
-        group.interface.items_tree['Scale'].min_value = self.scale.min
-        group.interface.items_tree['Scale'].max_value = self.scale.max
+        group.interface.items_tree['Scale'].min_value = -1000
+        group.interface.items_tree['Scale'].max_value = 1000
 
         self.create_partial_inputs(group, texture_panel)
 
@@ -109,8 +108,8 @@ class PartialProperties(TriplanarMappingProperties):
 
     def create_ramp_outputs(self, group):
         group.interface.new_socket(
-            name=f"Color",
-            in_out='INPUT',
+            name='Color',
+            in_out='OUTPUT',
             socket_type='NodeSocketColor'
         )
 
@@ -139,10 +138,12 @@ class PartialProperties(TriplanarMappingProperties):
 
     def create_ramp_drivers(self, color_ramps, material):
         for i in range(1, 5):
-            if i != 4:
-                pin = color_ramps[i-1].color_ramp.elements[0]
+            if i == 4:
+                pin = color_ramps[i - 2].color_ramp.elements[1]
             else:
-                pin = color_ramps[i - 1].color_ramp.elements[1]
+                pin = color_ramps[i - 1].color_ramp.elements[0]
+
+
             # Create a driver for the pin's position
             driver = pin.driver_add("position").driver  # Add a driver for the 'position' property
             # Set up the driver type and target
@@ -154,7 +155,7 @@ class PartialProperties(TriplanarMappingProperties):
             # Target the Value node's output (node output or specific property)
             var.targets[0].id_type = 'MATERIAL'
             var.targets[0].id = material  # The Value node is the driver source
-            var.targets[0].data_path = f"node_tree.nodes[\"Group\"].inputs[\"Color {i}\"].default_value"  # The value input/output property
+            var.targets[0].data_path = f"node_tree.nodes[\"Group\"].inputs[\"Color position {i}\"].default_value"  # The value input/output property
 
     def link_ramp(self, input_node, output_node, links, color_ramps, mix_nodes):
         # Connect the color ramps and MixRGB nodes
@@ -164,6 +165,10 @@ class PartialProperties(TriplanarMappingProperties):
                 links.new(mix_nodes[i].outputs['Result'],
                           mix_nodes[i + 1].inputs['A'])  # Output of current Mix to next Mix
 
+        # connect Fac to color ramps
+        for i in range(3):
+            links.new(input_node.outputs['Fac'], color_ramps[i].inputs['Fac'])
+
         for i in range(1, 5):
             if i == 1:
                 links.new(input_node.outputs[f"Color {i}"], mix_nodes[i - 1].inputs['A'])
@@ -171,10 +176,15 @@ class PartialProperties(TriplanarMappingProperties):
                 links.new(input_node.outputs[f"Color {i}"], mix_nodes[i - 2].inputs['B'])
 
         # Connect Mix to OutputNode
-        links.new(mix_nodes[2].outputs['Result'], output_node.inputs["Color"])
+        links.new(mix_nodes[2].outputs['Result'], output_node.inputs['Color'])
 
     def link_inputs(self, links, input_node, mapping_node, texture_node, color_ramp):
+       #connect basic inputs
        super().link_inputs(links, input_node, mapping_node, texture_node, color_ramp)
+
+       # connect scale
+       links.new(input_node.outputs['Scale'], texture_node.inputs['Scale'])
+       #connect Colors
        for i in range(1, 5):
             links.new(input_node.outputs[f"Color {i}"], color_ramp.inputs[f"Color {i}"])
 
