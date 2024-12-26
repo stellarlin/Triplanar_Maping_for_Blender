@@ -8,8 +8,8 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
         description="Name for the created material",
         default="DefaultPlanar_Material")  # Default name if no name is provided
 
-    scale: bpy.props.FloatVectorProperty(
-        name="Scale",
+    mapping_scale: bpy.props.FloatVectorProperty(
+        name="Mapping Scale",
         description="Scale along X, Y, Z axes",
         default=(0.2, 0.2, 0.2),  # Default scale
         min=0.0,  # Minimum allowed value
@@ -35,7 +35,7 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
             socket_type='NodeSocketVector'
         )
         group.interface.items_tree['Mapping Scale'].subtype = 'XYZ'
-        group.interface.items_tree['Mapping Scale'].default_value = self.scale
+        group.interface.items_tree['Mapping Scale'].default_value = self.mapping_scale
         return
 
     def create_outputs(self, group):
@@ -94,7 +94,7 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
             custom_ramp.node_tree = self.create_ramp(material)
             custom_ramp.location = (800, 0)
 
-            links.new(texture_node.outputs['Color'], custom_ramp.inputs['Fac'])
+            links.new(texture_node.outputs['Fac'], custom_ramp.inputs['Fac'])
             links.new(custom_ramp.outputs['Color'], bsdf_node.inputs['Base Color'])
             self.link_inputs(links, input_node, mapping_node, texture_node, custom_ramp)
         else:
