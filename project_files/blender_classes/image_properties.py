@@ -46,7 +46,7 @@ class ImageProperties(TriplanarMappingProperties):
         group.interface.items_tree['Texture Blend'].subtype = 'FACTOR'
         group.interface.items_tree['Texture Blend'].default_value = self.blending
 
-    def link_inputs(self, links, input_node, mapping_node, texture_node):
+    def link_inputs(self, links, input_node, mapping_node, texture_node, color_ramp):
         links.new(input_node.outputs['Mapping Scale'], mapping_node.inputs['Scale'])
         return
 

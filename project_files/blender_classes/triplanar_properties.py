@@ -29,7 +29,7 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
             socket_type='NodeSocketShader'
     )
 
-    def link_inputs(self, links, input_node, mapping_node, texture_node):
+    def link_inputs(self, links, input_node, mapping_node, texture_node, color_ramp):
         return
 
     def link_outputs(self, links, output_node,  bsdf_node):
@@ -69,15 +69,17 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
         texture_node = self.create_texture(nodes, material)
         texture_node.location = (400, 0)
 
-        if self.partial() == True:
+        if self.partial():
             custom_ramp = nodes.new('ShaderNodeGroup')
             custom_ramp.node_tree = self.create_ramp(material)
-
             custom_ramp.location = (800, 0)
+
             links.new(texture_node.outputs['Color'], custom_ramp.inputs['Fac'])
             links.new(custom_ramp.outputs['Color'], bsdf_node.inputs['Base Color'])
+            self.link_inputs(links, input_node, mapping_node, texture_node, custom_ramp)
         else:
             links.new(texture_node.outputs['Color'], bsdf_node.inputs['Base Color'])
+            self.link_inputs(links, input_node, mapping_node, texture_node, None)
 
 
         # Connect the Texture Coordinate node to the Mapping node
@@ -88,7 +90,7 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
 
 
         self.link_outputs(links, output_node, bsdf_node)
-        self.link_inputs(links, input_node, mapping_node, texture_node)
+
         return node_group
 
     def create_material(self):
