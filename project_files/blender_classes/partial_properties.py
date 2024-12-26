@@ -66,16 +66,22 @@ class PartialProperties(TriplanarMappingProperties):
             1.0, 1.0, 1.0, 1.0)  # Default white if not set
             group.interface.items_tree[f"Color position {number}"].default_value = 0.0
 
+    def create_partial_inputs(self, group, texture_panel):
+        return
 
-    def create_inputs(self, group):
+    def create_inputs(self, group, texture_panel):
+        super().create_inputs(group, texture_panel)
         group.interface.new_socket(
-            name='Texture Scale',
+            name='Scale',
             in_out='INPUT',
-            socket_type='NodeSocketFloat'
+            socket_type='NodeSocketFloat',
+            parent = texture_panel
         )
-        group.interface.items_tree['Texture Scale'].default_value = self.scale
-        group.interface.items_tree['Texture Scale'].min_value = self.scale.min
-        group.interface.items_tree['Texture Scale'].max_value = self.scale.max
+        group.interface.items_tree['Scale'].default_value = self.scale
+        group.interface.items_tree['Scale'].min_value = self.scale.min
+        group.interface.items_tree['Scale'].max_value = self.scale.max
+
+        self.create_partial_inputs(group, texture_panel)
 
         panel = group.interface.new_panel(name = "Colors",
                                         description='Colors of the Color Ramp and their positions',
@@ -168,10 +174,9 @@ class PartialProperties(TriplanarMappingProperties):
         links.new(mix_nodes[2].outputs['Result'], output_node.inputs["Color"])
 
     def link_inputs(self, links, input_node, mapping_node, texture_node, color_ramp):
-        links.new(input_node.outputs['Mapping Scale'], mapping_node.inputs['Scale'])
-        for i in range(1, 5):
+       super().link_inputs(links, input_node, mapping_node, texture_node, color_ramp)
+       for i in range(1, 5):
             links.new(input_node.outputs[f"Color {i}"], color_ramp.inputs[f"Color {i}"])
-        return
 
     def create_ramp(self, material):
         node_group = bpy.data.node_groups.new(name="CustomRamp", type="ShaderNodeTree")
