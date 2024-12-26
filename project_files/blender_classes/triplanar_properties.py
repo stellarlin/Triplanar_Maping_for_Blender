@@ -13,6 +13,12 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
         # This method should be implemented by subclasses.
         return nodes.new(type='ShaderNodeTexImage')
 
+    def create_ramp(self, material):
+        return bpy.data.node_groups.new(name="CustomRamp", type="ShaderNodeTree")
+
+    def partial(self):
+        return False
+
     def create_inputs(self, group):
         return
 
@@ -58,16 +64,28 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
 
         # Add a Diffuse BSDF shader
         bsdf_node = nodes.new(type='ShaderNodeBsdfPrincipled')
-        bsdf_node.location = (800, 0)
+        bsdf_node.location = (1000, 0)
 
         texture_node = self.create_texture(nodes, material)
+        texture_node.location = (400, 0)
+
+        if self.partial() == True:
+            custom_ramp = nodes.new('ShaderNodeGroup')
+            custom_ramp.node_tree = self.create_ramp(material)
+
+            custom_ramp.location = (800, 0)
+            links.new(texture_node.outputs['Color'], custom_ramp.inputs['Fac'])
+            links.new(custom_ramp.outputs['Color'], bsdf_node.inputs['Base Color'])
+        else:
+            links.new(texture_node.outputs['Color'], bsdf_node.inputs['Base Color'])
+
 
         # Connect the Texture Coordinate node to the Mapping node
         links.new(texture_coord_node.outputs['Generated'], mapping_node.inputs['Vector'])
         # Connect the Mapping node to the Texture node
         links.new(mapping_node.outputs['Vector'], texture_node.inputs['Vector'])
         # Connect the combined RGB to the diffuse shader
-        links.new(texture_node.outputs['Color'], bsdf_node.inputs['Base Color'])
+
 
         self.link_outputs(links, output_node, bsdf_node)
         self.link_inputs(links, input_node, mapping_node, texture_node)
@@ -93,7 +111,7 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
 
         # Add a Material Output node
         output_node = nodes.new(type='ShaderNodeOutputMaterial')
-        output_node.location = (400, 0)
+        output_node.location = (1400, 0)
 
         # Connect the diffuse shader to the material output
         links.new(node_group.outputs['BSDF'], output_node.inputs['Surface'])
