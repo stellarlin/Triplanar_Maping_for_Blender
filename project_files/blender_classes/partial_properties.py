@@ -16,29 +16,45 @@ class ColorPositionPair(bpy.types.PropertyGroup):
         description="Position"
     )
 
-class ColorPropertiesGroup(bpy.types.PropertyGroup):
+
+class PartialProperties(TriplanarMappingProperties):
+
+    scale: bpy.props.FloatVectorProperty(
+        name ="Texture Scale",
+        description ="Scale of the texture",
+        min = -1000,  # Minimum allowed value
+        max = 1000,  # Maximum allowed value
+    )
+
     color_pair_1: bpy.props.PointerProperty(type=ColorPositionPair)
     color_pair_2: bpy.props.PointerProperty(type=ColorPositionPair)
     color_pair_3: bpy.props.PointerProperty(type=ColorPositionPair)
     color_pair_4: bpy.props.PointerProperty(type=ColorPositionPair)
 
-    def create_color_input(self, group, number):
+    def partial(self):
+        return True
+
+    def create_color_input(self, group, number, panel):
         group.interface.new_socket(
             name=f"Color {number}",
             in_out='INPUT',
-            socket_type='NodeSocketColor'
+            socket_type='NodeSocketColor',
+            parent = panel
         )
 
+    def create_position_input(self, group, number, panel):
         group.interface.new_socket(
             name=f"Color position {number}",
             in_out='INPUT',
-            socket_type='NodeSocketVector'
+            socket_type='NodeSocketVector',
+            parent = panel
         )
 
         group.interface.items_tree[f"Color position {number}"].min_value = 0.0
         group.interface.items_tree[f"Color position {number}"].max_value = 1.0
         group.interface.items_tree[f"Color position {number}"].subtype = 'FACTOR'
 
+    def set_color_pair_input (self, group, number):
         color_pair_attr = f"color_pair_{number}"
         if hasattr(self, color_pair_attr):
             color_pair = getattr(self, color_pair_attr)
@@ -46,11 +62,32 @@ class ColorPropertiesGroup(bpy.types.PropertyGroup):
             group.interface.items_tree[f"Color position {number}"].default_value = color_pair.position
 
         else:
-            group.interface.items_tree[f"Color {number}"].default_value = (1.0, 1.0, 1.0, 1.0)  # Default white if not set
+            group.interface.items_tree[f"Color {number}"].default_value = (
+            1.0, 1.0, 1.0, 1.0)  # Default white if not set
             group.interface.items_tree[f"Color position {number}"].default_value = 0.0
 
 
-    def create_inputs(self,group):
+    def create_inputs(self, group):
+        group.interface.new_socket(
+            name='Texture Scale',
+            in_out='INPUT',
+            socket_type='NodeSocketFloat'
+        )
+        group.interface.items_tree['Texture Scale'].default_value = self.scale
+        group.interface.items_tree['Texture Scale'].min_value = self.scale.min
+        group.interface.items_tree['Texture Scale'].max_value = self.scale.max
+
+        panel = group.interface.new_panel(name = "Colors",
+                                        description='Colors of the Color Ramp and their positions',
+                                        default_closed=False)
+
+
+        for i in range(1, 5):
+            self.create_color_input(group, i, panel)
+            self.create_position_input(group, i, panel)
+            self.set_color_pair_input(group, i)
+
+    def create_ramp_inputs(self, group):
         group.interface.new_socket(
             name='Fac',
             in_out='INPUT',
@@ -62,9 +99,9 @@ class ColorPropertiesGroup(bpy.types.PropertyGroup):
         group.interface.items_tree['Fac'].subtype = 'FACTOR'
 
         for i in range(1, 5):
-            self.create_color_input(group, i)
+            self.create_color_input(group, i, None)
 
-    def create_outputs(self, group):
+    def create_ramp_outputs(self, group):
         group.interface.new_socket(
             name=f"Color",
             in_out='INPUT',
@@ -83,7 +120,7 @@ class ColorPropertiesGroup(bpy.types.PropertyGroup):
             y_offset -= 200
         return color_ramps
 
-    def create_mixRGB (self, nodes):
+    def create_mix (self, nodes):
         mix_nodes = []
         for i in range(3):
             mix_node = nodes.new(type="ShaderNodeMix")
@@ -94,73 +131,67 @@ class ColorPropertiesGroup(bpy.types.PropertyGroup):
             mix_nodes.append(mix_node)
         return mix_nodes
 
-    def link_mix_color_ramp(self, color_ramps, mix_nodes, links):
+    def create_ramp_drivers(self, color_ramps, material):
+        for i in range(1, 5):
+            if i != 4:
+                pin = color_ramps[i-1].color_ramp.elements[0]
+            else:
+                pin = color_ramps[i - 1].color_ramp.elements[1]
+            # Create a driver for the pin's position
+            driver = pin.driver_add("position").driver  # Add a driver for the 'position' property
+            # Set up the driver type and target
+            driver.type = 'SUM'
+            var = driver.variables.new()
+            var.name = "pos"  # Name of the driver variable
+            var.type = 'SINGLE_PROP'
+
+            # Target the Value node's output (node output or specific property)
+            var.targets[0].id_type = 'MATERIAL'
+            var.targets[0].id = material  # The Value node is the driver source
+            var.targets[0].data_path = f"node_tree.nodes[\"Group\"].inputs[\"Color {i}\"].default_value"  # The value input/output property
+
+    def link_ramp(self, input_node, output_node, links, color_ramps, mix_nodes):
         # Connect the color ramps and MixRGB nodes
         for i in range(3):
             links.new(color_ramps[i].outputs['Color'], mix_nodes[i].inputs['Factor'])
             if i + 1 < len(mix_nodes):  # Ensure we're within the valid range for the next MixRGB node
-                links.new(mix_nodes[i].outputs['Result'], mix_nodes[i + 1].inputs['A'])  # Output of current Mix to next Mix
+                links.new(mix_nodes[i].outputs['Result'],
+                          mix_nodes[i + 1].inputs['A'])  # Output of current Mix to next Mix
 
-    def link_inputs(self, group, links, mix_nodes):
         for i in range(1, 5):
             if i == 1:
-                links.new(group.interface.items_tree[f"Color {i}"], mix_nodes[i - 1].inputs['A'])
+                links.new(input_node.outputs[f"Color {i}"], mix_nodes[i - 1].inputs['A'])
             else:
-                links.new(group.interface.items_tree[f"Color {i}"], mix_nodes[i - 2].inputs['B'])
+                links.new(input_node.outputs[f"Color {i}"], mix_nodes[i - 2].inputs['B'])
 
+        # Connect Mix to OutputNode
+        links.new(mix_nodes[2].outputs['Result'], output_node.inputs["Color"])
 
-def create_custom_ramp(self, texture_node):
-        node_group = bpy.data.node_groups.new("CustomColorRamp", "ShaderNodeTree")
+    def link_inputs(self, links, input_node, mapping_node, texture_node, color_ramp):
+        links.new(input_node.outputs['Mapping Scale'], mapping_node.inputs['Scale'])
+        for i in range(1, 5):
+            links.new(input_node.outputs[f"Color {i}"], color_ramp.inputs[f"Color {i}"])
+        return
+
+    def create_ramp(self, material):
+        node_group = bpy.data.node_groups.new(name="CustomRamp", type="ShaderNodeTree")
         nodes = node_group.nodes
         links = node_group.links
 
-        #create inputs
-        self.create_inputs(node_group)
+        # create inputs
+        self.create_ramp_inputs(node_group)
         input_node = node_group.nodes.new("NodeGroupInput")
-        input_node.location = (-200,0)
+        input_node.location = (-200, 0)
 
-
-        #create outputs
-        self.reate_outputs(node_group)
+        # create outputs
+        self.create_ramp_outputs(node_group)
         output_node = node_group.nodes.new("NodeGroupOutput")
         output_node.location = (800, 0)
 
         # Create four color ramp nodes
         color_ramps = self.create_color_ramps(nodes)
-        mix_nodes = self.create_mixRGB(nodes)
+        mix_nodes = self.create_mix(nodes)
 
-        self.link_mix_color_ramp(color_ramps, mix_nodes, links)
-        self.link_inputs(node_group, links, mix_nodes)
-
-        links.new(mix_nodes[2].outputs['Result'], node_group.interface.items_tree["Color"])
+        self.link_ramp(input_node, output_node, links, color_ramps, mix_nodes)
+        self.create_ramp_drivers(color_ramps, material)
         return node_group
-
-class PartialProperties(TriplanarMappingProperties):
-
-    scale: bpy.props.FloatVectorProperty(
-        name ="Scale",
-        description ="Scale of the texture",
-        min = -1000,  # Minimum allowed value
-        max = 1000,  # Maximum allowed value
-    )
-    colors: bpy.props.PointerProperty(type=ColorPropertiesGroup)
-
-    def create_inputs(self, group):
-        group.interface.new_socket(
-            name='Texture Scale',
-            in_out='INPUT',
-            socket_type='NodeSocketFloat'
-        )
-        group.interface.items_tree['Texture Scale'].default_value = self.scale
-        group.interface.items_tree['Texture Scale'].min_value = self.scale.min
-        group.interface.items_tree['Texture Scale'].max_value = self.scale.max
-
-
-
-    def link_inputs(self, links, input_node, mapping_node, texture_node):
-        links.new(input_node.outputs['Mapping Scale'], mapping_node.inputs['Scale'])
-        return
-
-    def create_texture(self, nodes, material):
-
-        return texture_node
