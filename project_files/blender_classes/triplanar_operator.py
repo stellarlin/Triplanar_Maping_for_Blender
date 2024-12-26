@@ -6,19 +6,18 @@ import bpy
 
 class ApplyMaterialOperator(bpy.types.Operator):
     bl_idname = "material.apply_planar"
-    bl_label = "Apply Material"
+    bl_label = "Apply"
     bl_description = "Create a new material"
     bl_options = {'REGISTER', 'UNDO'}
 
     def choose_properties(self, context):
         if context.scene.texture_type == 'TEX_IMAGE':
             return context.scene.image_properties
+        if context.scene.texture_type == 'NOISE':
+            return context.scene.noise_properties
 
     def execute(self, context):
         props = self.choose_properties(context)
-
-      #  elif context.scene.texture_type == 'NOISE':
-      #      props = context.scene.noise_properties
 
         # Get the selected object
         obj = context.active_object
