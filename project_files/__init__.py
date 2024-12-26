@@ -29,6 +29,7 @@ from .blender_classes import triplanar_operator as operator
 from .blender_classes import triplanar_panel as panel
 from .blender_classes.image_properties import ImageProperties
 from .blender_classes.partial_properties import  PartialProperties
+from .blender_classes.partial_properties import  ColorPositionPair
 from .blender_classes.noise_properties import  NoiseProperties
 
 
@@ -51,8 +52,9 @@ def register():
 
     bpy.utils.register_class(properties.TriplanarMappingProperties)
     bpy.utils.register_class(ImageProperties)
+    bpy.utils.register_class(ColorPositionPair)
     bpy.utils.register_class(PartialProperties)
-    bpy.utils.register_class(Noise_Properties)
+    bpy.utils.register_class(NoiseProperties)
 
     bpy.utils.register_class(operator.ApplyMaterialOperator)
     bpy.utils.register_class(panel.PlanarMappingPanel)
@@ -78,6 +80,8 @@ def unregister():
 
     bpy.utils.unregister_class(properties.TriplanarMappingProperties)
     bpy.utils.unregister_class(ImageProperties)
+    bpy.utils.unregister_class(ColorPositionPair)
+    bpy.utils.unregister_class(PartialProperties)
     bpy.utils.uregister_class(NoiseProperties)
 
     bpy.utils.unregister_class(operator.ApplyMaterialOperator)
