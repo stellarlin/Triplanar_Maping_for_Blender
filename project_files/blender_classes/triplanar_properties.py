@@ -8,6 +8,15 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
         description="Name for the created material",
         default="DefaultPlanar_Material")  # Default name if no name is provided
 
+    scale: bpy.props.FloatVectorProperty(
+        name="Scale",
+        description="Scale along X, Y, Z axes",
+        default=(0.2, 0.2, 0.2),  # Default scale
+        min=0.0,  # Minimum allowed value
+        max=3.0,  # Maximum allowed value
+        size=3,  # Number of components (X, Y, Z)
+        subtype='XYZ'  # Display subtype for UI
+    )
 
     def create_texture(self, nodes, material):
         # This method should be implemented by subclasses.
@@ -19,7 +28,14 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
     def partial(self):
         return False
 
-    def create_inputs(self, group):
+    def create_inputs(self, group, texture_panel):
+        group.interface.new_socket(
+            name='Mapping Scale',
+            in_out='INPUT',
+            socket_type='NodeSocketVector'
+        )
+        group.interface.items_tree['Mapping Scale'].subtype = 'XYZ'
+        group.interface.items_tree['Mapping Scale'].default_value = self.scale
         return
 
     def create_outputs(self, group):
@@ -30,7 +46,7 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
     )
 
     def link_inputs(self, links, input_node, mapping_node, texture_node, color_ramp):
-        return
+        links.new(input_node.outputs['Mapping Scale'], mapping_node.inputs['Scale'])
 
     def link_outputs(self, links, output_node,  bsdf_node):
         links.new(output_node.inputs['BSDF'], bsdf_node.outputs["BSDF"])
@@ -43,7 +59,11 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
         links = node_group.links
 
         # Add inputs
-        self.create_inputs(node_group)
+        texture_panel = node_group.interface.new_panel(name="Texture Properties",
+                                          description='Colors of the Color Ramp and their positions',
+                                          default_closed=False)
+
+        self.create_inputs(node_group, texture_panel)
         input_node = nodes.new(type='NodeGroupInput')
         input_node.location = (-350, 0)
 

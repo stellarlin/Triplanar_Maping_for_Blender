@@ -9,46 +9,25 @@ class ImageProperties(TriplanarMappingProperties):
         description = "Texture for x label",
         subtype = 'FILE_PATH')
 
-    scale: bpy.props.FloatVectorProperty(
-        name="Scale",
-        description="Scale along X, Y, Z axes",
-        default=(0.2, 0.2, 0.2),  # Default scale
-        min=0.0,  # Minimum allowed value
-        max=3.0,  # Maximum allowed value
-        size=3,  # Number of components (X, Y, Z)
-        subtype='XYZ'  # Display subtype for UI
-    )
-
     blending: bpy.props.FloatProperty(
         name="Blending",
         description="",
         default=0.2
         )
 
-    def create_inputs(self, group):
-        group.interface.new_socket(
-            name='Mapping Scale',
-            in_out='INPUT',
-            socket_type='NodeSocketVector'
-        )
-        group.interface.items_tree['Mapping Scale'].subtype = 'XYZ'
-        group.interface.items_tree['Mapping Scale'].default_value = self.scale
-
-
+    def create_inputs(self, group, texture_panel):
+        super().create_inputs(group, texture_panel)
         group.interface.new_socket(
             name='Texture Blend',
             in_out='INPUT',
-            socket_type='NodeSocketFloat'
+            socket_type='NodeSocketFloat',
+            parent = texture_panel
         )
 
         group.interface.items_tree['Texture Blend'].min_value = 0.0
         group.interface.items_tree['Texture Blend'].max_value = 1.0
         group.interface.items_tree['Texture Blend'].subtype = 'FACTOR'
         group.interface.items_tree['Texture Blend'].default_value = self.blending
-
-    def link_inputs(self, links, input_node, mapping_node, texture_node, color_ramp):
-        links.new(input_node.outputs['Mapping Scale'], mapping_node.inputs['Scale'])
-        return
 
     def create_texture(self, nodes, material):
         texture_node = nodes.new(type='ShaderNodeTexImage')
