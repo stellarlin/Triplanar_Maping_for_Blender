@@ -28,6 +28,9 @@ from .blender_classes import triplanar_properties as properties
 from .blender_classes import triplanar_operator as operator
 from .blender_classes import triplanar_panel as panel
 from .blender_classes.image_properties import ImageProperties
+from .blender_classes.partial_properties import  PartialProperties
+from .blender_classes.noise_properties import  NoiseProperties
+
 
 import bpy
 
@@ -48,7 +51,8 @@ def register():
 
     bpy.utils.register_class(properties.TriplanarMappingProperties)
     bpy.utils.register_class(ImageProperties)
-    #bpy.utils.register_class(properties.Noise_Properties)
+    bpy.utils.register_class(PartialProperties)
+    bpy.utils.register_class(Noise_Properties)
 
     bpy.utils.register_class(operator.ApplyMaterialOperator)
     bpy.utils.register_class(panel.PlanarMappingPanel)
@@ -64,7 +68,7 @@ def register():
         default='NONE'
     )
     bpy.types.Scene.image_properties = bpy.props.PointerProperty(type=ImageProperties)
-    #bpy.types.Scene.noise_properties = bpy.props.PointerProperty(type=properties.Noise_Properties)
+    bpy.types.Scene.noise_properties = bpy.props.PointerProperty(type=NoiseProperties)
 
 
 def unregister():
@@ -74,14 +78,14 @@ def unregister():
 
     bpy.utils.unregister_class(properties.TriplanarMappingProperties)
     bpy.utils.unregister_class(ImageProperties)
-  #  bpy.utils.uregister_class(properties.Noise_Properties)
+    bpy.utils.uregister_class(NoiseProperties)
 
     bpy.utils.unregister_class(operator.ApplyMaterialOperator)
     bpy.utils.unregister_class(panel.PlanarMappingPanel)
 
     # Unregister properties if needed
     del bpy.types.Scene.image_properties
- #   del bpy.types.Scene.noise_properties
+    del bpy.types.Scene.noise_properties
 
 if __name__ == "__main__":
     register()
