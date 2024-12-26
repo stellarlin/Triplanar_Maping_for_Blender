@@ -99,4 +99,4 @@ class ImageProperties(TriplanarMappingProperties):
 
         # Modify the Blend property
         texture_node.projection_blend = self.blending
-        mapping_node.inputs['Scale'].default_value = self.scale
+        mapping_node.inputs['Scale'].default_value = self.mapping_scale

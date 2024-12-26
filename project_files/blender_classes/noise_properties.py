@@ -5,7 +5,7 @@ class NoiseProperties(PartialProperties):
     detail: bpy.props.FloatProperty(
         name="Detail",
         description="Detail of the noise texture",
-        default=0,
+        default=1.5,
         min=-1000,
         max=1000,
     )
@@ -27,37 +27,37 @@ class NoiseProperties(PartialProperties):
 
     def create_partial_inputs(self, group, texture_panel):
         group.interface.new_socket(
-            name=self.detail.name,
+            name='Detail',
             in_out='INPUT',
             socket_type='NodeSocketFloat',
             parent = texture_panel,
         )
         group.interface.items_tree['Detail'].default_value = self.detail
-        group.interface.items_tree['Detail'].min_value = self.detail.min
-        group.interface.items_tree['Detail'].max_value = self.detail.max
+        group.interface.items_tree['Detail'].min_value = -1000
+        group.interface.items_tree['Detail'].max_value = 1000
 
         group.interface.new_socket(
-            name= self.roughness.name,
+            name= 'Roughness',
             in_out='INPUT',
             socket_type='NodeSocketFloat',
             parent=texture_panel,
         )
 
         group.interface.items_tree['Roughness'].default_value = self.roughness
-        group.interface.items_tree['Roughness'].min_value = self.roughness.min
-        group.interface.items_tree['Roughness'].max_value = self.roughness.max
+        group.interface.items_tree['Roughness'].min_value = 0.0
+        group.interface.items_tree['Roughness'].max_value = 1.0
         group.interface.items_tree['Roughness'].subtype = 'FACTOR'
 
         group.interface.new_socket(
-            name=self.distortion.name,
+            name='Distortion',
             in_out='INPUT',
             socket_type='NodeSocketFloat',
             parent=texture_panel
         )
 
         group.interface.items_tree['Distortion'].default_value = self.distortion
-        group.interface.items_tree['Distortion'].min_value = self.distortion.min
-        group.interface.items_tree['Distortion'].max_value = self.distortion.max
+        group.interface.items_tree['Distortion'].min_value = 0.0
+        group.interface.items_tree['Distortion'].max_value = 0.1
         group.interface.items_tree['Distortion'].subtype = 'FACTOR'
 
     def link_inputs(self, links, input_node, mapping_node, texture_node, color_ramp):
