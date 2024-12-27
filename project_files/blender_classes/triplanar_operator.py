@@ -1,7 +1,14 @@
 import bpy
 
 
-
+def choose_properties(context):
+    props = context.scene.image_properties
+    if context.scene.texture_type == 'TEX_IMAGE':
+        return props
+    if context.scene.texture_type == 'NOISE':
+        props = context.scene.noise_properties
+    props.init_default_colors()
+    return props
 
 
 class ApplyMaterialOperator(bpy.types.Operator):
@@ -10,14 +17,8 @@ class ApplyMaterialOperator(bpy.types.Operator):
     bl_description = "Create a new material"
     bl_options = {'REGISTER', 'UNDO'}
 
-    def choose_properties(self, context):
-        if context.scene.texture_type == 'TEX_IMAGE':
-            return context.scene.image_properties
-        if context.scene.texture_type == 'NOISE':
-            return context.scene.noise_properties
-
     def execute(self, context):
-        props = self.choose_properties(context)
+        props = choose_properties(context)
 
         # Get the selected object
         obj = context.active_object
