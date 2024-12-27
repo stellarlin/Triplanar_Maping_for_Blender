@@ -23,6 +23,7 @@ class PartialProperties(TriplanarMappingProperties):
         description ="Scale of the texture",
         min = -1000,  # Minimum allowed value
         max = 1000,  # Maximum allowed value
+        default = 30
     )
 
     color_pair_1: bpy.props.PointerProperty(type=ColorPositionPair)
@@ -32,6 +33,20 @@ class PartialProperties(TriplanarMappingProperties):
 
     def partial(self):
         return True
+
+    def init_default_colors(self):
+        """Set the default values for color pairs."""
+        self.color_pair_1.color = (0.0, 0.0, 0.0, 1.0)  # #000000FF - black
+        self.color_pair_1.position = 0.125
+
+        self.color_pair_2.color = (0.3, 0.3, 0.3, 1.0)  # #4D4D4DFF - dark grey
+        self.color_pair_2.position = 0.250
+
+        self.color_pair_3.color = (0.58, 0.58, 0.58, 1.0)  # #949494FF - light grey
+        self.color_pair_3.position = 0.5
+        self.color_pair_4.color = (1.0, 1.0, 1.0, 1.0)  # #FFFFFFFF - white
+        self.color_pair_4.position = 1
+
 
     def create_color_input(self, group, number, panel):
         group.interface.new_socket(

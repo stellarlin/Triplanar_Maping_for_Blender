@@ -5,7 +5,7 @@ class NoiseProperties(PartialProperties):
     detail: bpy.props.FloatProperty(
         name="Detail",
         description="Detail of the noise texture",
-        default=1.5,
+        default=5,
         min=-1000,
         max=1000,
     )
@@ -20,7 +20,7 @@ class NoiseProperties(PartialProperties):
     distortion: bpy.props.FloatProperty(
         name="Distortion",
         description="Distortion of the noise texture",
-        default=0.5,
+        default=0,
         min=0.0,
         max=1.0,
     )

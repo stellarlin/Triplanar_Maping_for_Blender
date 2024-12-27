@@ -11,7 +11,7 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
     mapping_scale: bpy.props.FloatVectorProperty(
         name="Mapping Scale",
         description="Scale along X, Y, Z axes",
-        default=(0.2, 0.2, 0.2),  # Default scale
+        default=(0.4, 0.4, 0.4),  # Default scale
         min=0.0,  # Minimum allowed value
         max=3.0,  # Maximum allowed value
         size=3,  # Number of components (X, Y, Z)
@@ -25,8 +25,12 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
     def create_ramp(self, material):
         return bpy.data.node_groups.new(name="CustomRamp", type="ShaderNodeTree")
 
+
     def partial(self):
         return False
+
+    def init_default_colors(self):
+        return
 
     def create_inputs(self, group, texture_panel):
         group.interface.new_socket(
