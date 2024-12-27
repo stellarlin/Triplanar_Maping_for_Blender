@@ -16,6 +16,7 @@ class PlanarMappingPanel(bpy.types.Panel):
         layout.prop(prop, "blending")
 
     def draw_colors(self, layout,prop):
+
         # Color-position pairs
         box = layout.box()
         box.label(text="Colors:")
@@ -54,3 +55,4 @@ class PlanarMappingPanel(bpy.types.Panel):
 
         if scene.texture_type != 'NONE':
             layout.operator("material.apply_planar")
+            layout.operator("properties.reset_to_defaults")

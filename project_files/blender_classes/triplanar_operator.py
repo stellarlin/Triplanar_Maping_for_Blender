@@ -44,3 +44,24 @@ class ApplyMaterialOperator(bpy.types.Operator):
         self.report({'INFO'}, f"Applied {material.name}")
 
         return {"FINISHED"}
+
+class ResetMaterialPropertiesOperator(bpy.types.Operator):
+    """Reset Partial Properties to Default"""
+    bl_idname = "properties.reset_to_defaults"
+    bl_label = "Reset to Default"
+    bl_options = {'REGISTER', 'UNDO'}
+
+    def execute(self, context):
+        # Access the properties
+        props = choose_properties(context)
+
+        # Check if the properties object exists
+        if not props:
+            self.report({'ERROR'}, "Properties not found!")
+            return {'CANCELLED'}
+
+        # Call the method to reset properties to defaults
+        props.reset()
+
+        self.report({'INFO'}, "Properties reset to default values.")
+        return {'FINISHED'}
