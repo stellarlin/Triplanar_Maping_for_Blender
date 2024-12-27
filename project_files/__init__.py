@@ -31,6 +31,7 @@ from .blender_classes.image_properties import ImageProperties
 from .blender_classes.partial_properties import  PartialProperties
 from .blender_classes.partial_properties import  ColorPositionPair
 from .blender_classes.noise_properties import  NoiseProperties
+from .blender_classes.voronoi_properties import  VoronoiProperties
 
 
 import bpy
@@ -55,8 +56,10 @@ def register():
     bpy.utils.register_class(ColorPositionPair)
     bpy.utils.register_class(PartialProperties)
     bpy.utils.register_class(NoiseProperties)
+    bpy.utils.register_class(VoronoiProperties)
 
     bpy.utils.register_class(operator.ApplyMaterialOperator)
+    bpy.utils.register_class(operator.ResetMaterialPropertiesOperator)
     bpy.utils.register_class(panel.PlanarMappingPanel)
 
     bpy.types.Scene.texture_type = bpy.props.EnumProperty(
@@ -71,7 +74,7 @@ def register():
     )
     bpy.types.Scene.image_properties = bpy.props.PointerProperty(type=ImageProperties)
     bpy.types.Scene.noise_properties = bpy.props.PointerProperty(type=NoiseProperties)
-
+    bpy.types.Scene.voronoi_properties = bpy.props.PointerProperty(type=VoronoiProperties)
 
 def unregister():
     # Unregister each class in the list
@@ -83,13 +86,16 @@ def unregister():
     bpy.utils.unregister_class(ColorPositionPair)
     bpy.utils.unregister_class(PartialProperties)
     bpy.utils.uregister_class(NoiseProperties)
+    bpy.utils.unregister_class(VoronoiProperties)
 
     bpy.utils.unregister_class(operator.ApplyMaterialOperator)
+    bpy.utils.unregister_class(operator.ResetMaterialPropertiesOperator)
     bpy.utils.unregister_class(panel.PlanarMappingPanel)
 
     # Unregister properties if needed
     del bpy.types.Scene.image_properties
     del bpy.types.Scene.noise_properties
+    del bpy.types.Scene.voronoi_properties
 
 if __name__ == "__main__":
     register()
