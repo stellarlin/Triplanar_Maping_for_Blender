@@ -230,3 +230,10 @@ class PartialProperties(TriplanarMappingProperties):
         self.link_ramp(input_node, output_node, links, color_ramps, mix_nodes)
         self.create_ramp_drivers(color_ramps, material)
         return node_group
+
+    def reset(self):
+        super().reset()
+        self.scale = 30
+        self.init_default_colors()
+
+        return

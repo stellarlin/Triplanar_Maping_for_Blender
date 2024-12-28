@@ -144,19 +144,6 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
         print(f"Material '{self.name}' created successfully.")
         return material
 
-
-    def update_material(self, context):
-        # Get the active material
-        material = context.object.active_material
-
-        if not material:
-            print(f"No active material found.")
-            return
-
-        # Ensure the material has a node tree
-        if not material.use_nodes or not material.node_tree:
-            print(f"Material does not use nodes.")
-            return
-
-        material.name = self.name
-
+    def reset(self):
+        # Reset mapping scale property
+        self.mapping_scale = (0.4, 0.4, 0.4)  # Default value

@@ -80,5 +80,7 @@ class VoronoiProperties(PartialProperties):
         return voronoi_node
 
     def reset(self):
-        # todo reset to default
-        return
+        super().reset()
+        self.detail = 5
+        self.roughness = 0.5
+        self.randomness = 0.5

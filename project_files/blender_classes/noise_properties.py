@@ -73,3 +73,9 @@ class NoiseProperties(PartialProperties):
         noise_texture_node.noise_type='FBM'
 
         return noise_texture_node
+
+    def reset(self):
+        super().reset()
+        self.detail = 5
+        self.roughness = 0.5
+        self.distortion = 0
