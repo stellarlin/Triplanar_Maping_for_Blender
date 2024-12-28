@@ -16,7 +16,6 @@ class PlanarMappingPanel(bpy.types.Panel):
         layout.prop(prop, "blending")
 
     def draw_colors(self, layout,prop):
-
         # Color-position pairs
         box = layout.box()
         box.label(text="Colors:")
@@ -39,6 +38,14 @@ class PlanarMappingPanel(bpy.types.Panel):
         layout.prop(prop, "mapping_scale")
         self.draw_colors(layout, prop)
 
+    def draw_voronoi(self, layout, prop):
+        layout.prop(prop, "name")
+        layout.prop(prop, "scale")
+        layout.prop(prop, "detail")
+        layout.prop(prop, "roughness")
+        layout.prop(prop, "randomness")
+        layout.prop(prop, "mapping_scale")
+        self.draw_colors(layout, prop)
 
     def draw(self, context):
         layout = self.layout
@@ -50,8 +57,10 @@ class PlanarMappingPanel(bpy.types.Panel):
 
         if scene.texture_type == 'TEX_IMAGE':
             self.draw_tex_image(layout, scene.image_properties)
-        if scene.texture_type == 'NOISE':
+        elif scene.texture_type == 'NOISE':
             self.draw_noise(layout, scene.noise_properties)
+        elif scene.texture_type == 'VORONOI':
+            self.draw_voronoi(layout, scene.voronoi_properties)
 
         if scene.texture_type != 'NONE':
             layout.operator("material.apply_planar")

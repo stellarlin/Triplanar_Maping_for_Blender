@@ -66,12 +66,16 @@ class VoronoiProperties(PartialProperties):
         links.new (input_node.outputs['Roughness'], texture_node.inputs['Roughness'])
         links.new (input_node.outputs['Randomness'], texture_node.inputs['Randomness'])
 
+    def link_partial(self, links, texture_node, custom_ramp, bsdf_node):
+        links.new(texture_node.outputs['Color'], custom_ramp.inputs['Fac'])
+        links.new(custom_ramp.outputs['Color'], bsdf_node.inputs['Base Color'])
+
     def create_texture(self, nodes, material):
         voronoi_node= nodes.new(type="ShaderNodeTexVoronoi")
         voronoi_node.feature = 'F1'
         voronoi_node.distance = 'MANHATTAN'
         voronoi_node.voronoi_dimensions = '3D'
-        voronoi_node.use_normalize = True
+        voronoi_node.normalize = True
 
         return voronoi_node
 

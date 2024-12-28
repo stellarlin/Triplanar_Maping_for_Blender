@@ -7,7 +7,8 @@ def choose_properties(context):
         return props
     if context.scene.texture_type == 'NOISE':
         props = context.scene.noise_properties
-    props.init_default_colors()
+    elif context.scene.texture_type == 'VORONOI':
+        props = context.scene.voronoi_properties
     return props
 
 
