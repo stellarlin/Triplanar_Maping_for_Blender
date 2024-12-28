@@ -67,8 +67,9 @@ def register():
         description="Choose a type",
         items=[
             ('NONE', "-", "No type selected"),
-            ('TEX_IMAGE', "Image", "Settings for Texture Image"),
-            ('NOISE', "Noise", "Settings for Noise"),
+            ('TEX_IMAGE', "Image", "Properties for Texture Image"),
+            ('NOISE', "Noise", "Properties for Noise"),
+            ('VORONOI', "Voronoi", "Properies for Voronoi Texture"),
         ],
         default='NONE'
     )
