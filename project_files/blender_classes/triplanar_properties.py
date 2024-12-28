@@ -29,9 +29,6 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
     def partial(self):
         return False
 
-    def init_default_colors(self):
-        return
-
     def create_inputs(self, group, texture_panel):
         group.interface.new_socket(
             name='Mapping Scale',
@@ -54,6 +51,9 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
 
     def link_outputs(self, links, output_node,  bsdf_node):
         links.new(output_node.inputs['BSDF'], bsdf_node.outputs["BSDF"])
+        return
+
+    def link_partial(self, links, texture_node, custom_ramp, bsdf_node):
         return
 
     def create_group (self,  material):
@@ -98,8 +98,7 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
             custom_ramp.node_tree = self.create_ramp(material)
             custom_ramp.location = (800, 0)
 
-            links.new(texture_node.outputs['Fac'], custom_ramp.inputs['Fac'])
-            links.new(custom_ramp.outputs['Color'], bsdf_node.inputs['Base Color'])
+            self.link_partial(links, texture_node, custom_ramp, bsdf_node)
             self.link_inputs(links, input_node, mapping_node, texture_node, custom_ramp)
         else:
             links.new(texture_node.outputs['Color'], bsdf_node.inputs['Base Color'])
