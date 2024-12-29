@@ -3,9 +3,9 @@
 ---
 **Author:** Sofiia Prykhach
 
- **Version:** 1.0.0 **
+ **Version:** 1.0.0 
  
- Blender Compatibility:** 4.3.0 and later 
+ **Blender Compatibility:** 4.3.0 and later 
  
  **Category:** Material
 
@@ -66,22 +66,76 @@ In the panel, there will be a dropdown menu labeled Type. This is where you can 
 ### 1. File Structure
 - **`program_files/__init__.py`**:
  This file serves as the initialization script for the add-on.
- - **`program_files/blender_classes/`** : Directory contains all the Python files responsible for the main logic of the add-on
-	 - **`triplanar_panel.py`**: The file contains the UI panel, that allows users to configure texture properties according to the chosen type.
-	 - **`triplanar_operator.py`**:  Contains two operators:
+ - **`program_files/blender_classes/`** :
+Directory contains all the Python files responsible for the main logic of the add-on
+	 - **`triplanar_panel.py`**
+    	The file contains the UI panel, that allows users to configure texture properties according to the chosen type.
+	 - **`triplanar_operator.py`**
+    	Contains two operators:
 		1. Operator `ApplyMaterialOperator` generates a material and applies it to the selected meshes. 
 		2. Operator `ResetPropertiesOperator` resets a selected texture property to its default values.
-	- **`triplanar_properties.py`**: Serves as the base class for all texture-related properties in the add-on. By inheriting from this  class, other property classes can easily reuse methods like `create_group` and other
-	- **`image_properties.py`**: Provides properties related to image textures.
-	- **`partial_properties.py`**: This is the base class that provides common functionality for partial generated texture properties. It contains logic for creating and linking  inputs, outputs and handling color ramps.
-	- **`noise_properties.py`**: Contains properties for generating noise textures.
-	- **`wave_properties.py`**: Provides properties for wave-based textures.
-	- **`magic_properties.py`**: Contains properties for generating magic textures
-	- **`voronoi_properties.py`**: Contains properties related to Voronoi textures.
+	- **`triplanar_properties.py`**
+   	Serves as the base class for all texture-related properties in the add-on. By inheriting from this  class, other property classes can easily reuse methods like `create_group` and other
+	- **`image_properties.py`**
+   	Provides properties related to image textures.
+	- **`partial_properties.py`**
+   	This is the base class that provides common functionality for partial generated texture properties. It contains logic for creating and linking  inputs, outputs and handling color ramps.
+	- **`noise_properties.py`**
+   	Contains properties for generating noise textures.
+	- **`wave_properties.py`**
+  	Provides properties for wave-based textures.
+	- **`magic_properties.py`**
+   	Contains properties for generating magic textures
+	- **`voronoi_properties.py`**
+   	Contains properties related to Voronoi textures.
 
 ---
-### 2. Core Classes and Inheritance Structure
-#### 2.1 TriplanarMappingProperties
+### 2. Core Principles 
+
+//todo desctiption
+
+```mermaid
+classDiagram
+    class TriplanarMappingProperties {
+        <<bpy.types.PropertyGroup>>
+    }
+
+    class PartialProperties {
+        <<inherits TriplanarMappingProperties>>
+    }
+
+    class ImageProperties {
+        <<inherits TriplanarMappingProperties>>
+    }
+
+    class NoiseProperties {
+        <<inherits PartialProperties>>
+    }
+
+    class VoronoiProperties {
+        <<inherits PartialProperties>>
+    }
+
+    class WaveProperties {
+        <<inherits PartialProperties>>
+    }
+
+    class MagicProperties {
+        <<inherits PartialProperties>>
+    }
+
+    TriplanarMappingProperties <|-- PartialProperties
+    TriplanarMappingProperties <|-- ImageProperties
+    PartialProperties <|-- NoiseProperties
+    PartialProperties <|-- VoronoiProperties
+    PartialProperties <|-- WaveProperties
+    PartialProperties <|-- MagicProperties
+```
+
+
+---
+### 3. Core Classes and Inheritance Structure
+#### 3.1 TriplanarMappingProperties
 
 The `TriplanarProperties`is a base class designed to provide essential functionality for subclasses representing specific texture types. Generates a complete material node tree based on triplanar mapping. Ensures accurate connections between texture coordinate, mapping, texture, and shader nodes.
 
@@ -143,7 +197,7 @@ Provides a default implementation for creating texture nodes. This method is int
 
 12. **`reset(self)`**: Resets all properties to their default values. This method is intended to be overridden by subclasses for specific texture types.
 
-#### 2.2 PartialProperties
+#### 3.2 PartialProperties
 
 `PartialProperties` is a subclass of `TriplanarMappingProperties` designed for generating custom triplanar texture properties with support for partial texture creation. It introduces additional features, including a custom color ramp with up to 4 configurable color-position pairs that is configurable outside the node group
 
