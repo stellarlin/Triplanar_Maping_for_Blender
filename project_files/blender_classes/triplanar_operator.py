@@ -2,14 +2,16 @@ import bpy
 
 
 def choose_properties(context):
-    props = context.scene.image_properties
     if context.scene.texture_type == 'TEX_IMAGE':
-        return props
+        return context.scene.image_properties
     if context.scene.texture_type == 'NOISE':
-        props = context.scene.noise_properties
-    elif context.scene.texture_type == 'VORONOI':
-        props = context.scene.voronoi_properties
-    return props
+        return context.scene.noise_properties
+    if context.scene.texture_type == 'VORONOI':
+        return context.scene.voronoi_properties
+    if context.scene.texture_type == 'WAVES':
+        return context.scene.wave_properties
+    if context.scene.texture_type == 'MAGIC':
+        return context.scene.magic_properties
 
 
 class ApplyMaterialOperator(bpy.types.Operator):
