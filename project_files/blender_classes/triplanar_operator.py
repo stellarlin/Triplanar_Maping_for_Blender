@@ -22,25 +22,23 @@ class ApplyMaterialOperator(bpy.types.Operator):
         props = choose_properties(context)
 
         # Get the selected object
-        obj = context.active_object
-        material = props.create_material()
-
-        if not obj:
-            self.report({'WARNING'}, "No active object selected")
-
-        if obj is None or obj.type != 'MESH':
-            self.report({'WARNING'}, "Active object is not a mesh")
+        if not context.selected_objects:
+            self.report({'WARNING'}, "No objects selected")
             return {'CANCELLED'}
 
-        # Store the material in a property to reference it later
-        # context.scene.created_material = material.name
-        # self.report({'INFO'}, f"Material '{material.name}' created successfully")
-        # Check if the selected object is a mesh
+        material = props.create_material()
+        for obj in context.selected_objects:
+            if not obj:
+                self.report({'WARNING'}, "No active object selected")
 
-        if obj.data.materials:
-            obj.data.materials[0] = material  # Apply to the first slot
-        else:
-            obj.data.materials.append(material)  # Add a new slot if none exists
+            if obj is None or obj.type != 'MESH':
+                self.report({'WARNING'}, "Active object is not a mesh")
+                continue
+
+            if  obj.data.materials:
+                obj.data.materials[0] = material  # Apply to the first slot
+            else:
+                obj.data.materials.append(material)  # Add a new slot if none exists
 
         self.report({'INFO'}, f"Applied {material.name}")
 
