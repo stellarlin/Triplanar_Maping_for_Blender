@@ -12,8 +12,8 @@ class PlanarMappingPanel(bpy.types.Panel):
         # Display properties in the UI
         layout.prop(prop, "name")
         layout.prop(prop, "texture")
-        layout.prop(prop, "mapping_scale")
         layout.prop(prop, "blending")
+        self.draw_mapping(layout, prop)
 
     def draw_colors(self, layout,prop):
         # Color-position pairs
@@ -29,14 +29,24 @@ class PlanarMappingPanel(bpy.types.Panel):
                 row.prop(color_pair, "color", text=f"Color {i}")
                 row.prop(color_pair, "position", text=f"Color position {i}")
 
+    def draw_mapping(self, layout,prop):
+        # Color-position pairs
+        box = layout.box()
+        box.label(text="Mapping:")
+
+        box.prop(prop, "mapping_scale", text="Scale")
+        box.prop(prop, "mapping_location", text="Location")
+        box.prop(prop, "mapping_rotation", text="Rotation")
+
     def draw_noise(self, layout, prop):
         layout.prop(prop, "name")
         layout.prop(prop, "scale")
         layout.prop(prop, "detail")
         layout.prop(prop, "roughness")
         layout.prop(prop, "distortion")
-        layout.prop(prop, "mapping_scale")
+
         self.draw_colors(layout, prop)
+        self.draw_mapping(layout, prop)
 
     def draw_voronoi(self, layout, prop):
         layout.prop(prop, "name")
@@ -44,8 +54,30 @@ class PlanarMappingPanel(bpy.types.Panel):
         layout.prop(prop, "detail")
         layout.prop(prop, "roughness")
         layout.prop(prop, "randomness")
-        layout.prop(prop, "mapping_scale")
+
         self.draw_colors(layout, prop)
+        self.draw_mapping(layout, prop)
+
+    def draw_wave(self, layout, prop):
+        layout.prop(prop, "name")
+        layout.prop(prop, "wave_type")
+        if prop.wave_type == 'BANDS': layout.prop(prop, "bands_direction")
+        else: layout.prop(prop, "rings_direction")
+        layout.prop(prop, "wave_profile")
+        layout.prop(prop, "scale")
+        layout.prop(prop, "distortion")
+
+        self.draw_colors(layout, prop)
+        self.draw_mapping(layout, prop)
+
+    def draw_magic(self, layout, prop):
+        layout.prop(prop, "name")
+        layout.prop(prop, "depth")
+        layout.prop(prop, "scale")
+        layout.prop(prop, "distortion")
+
+        self.draw_colors(layout, prop)
+        self.draw_mapping(layout, prop)
 
     def draw(self, context):
         layout = self.layout
@@ -61,7 +93,12 @@ class PlanarMappingPanel(bpy.types.Panel):
             self.draw_noise(layout, scene.noise_properties)
         elif scene.texture_type == 'VORONOI':
             self.draw_voronoi(layout, scene.voronoi_properties)
+        elif scene.texture_type == 'WAVES':
+            self.draw_wave(layout, scene.wave_properties)
+        elif scene.texture_type == 'MAGIC':
+            self.draw_magic(layout, scene.magic_properties)
 
         if scene.texture_type != 'NONE':
             layout.operator("material.apply_planar")
+            layout.operator("material.clear_all")
             layout.operator("properties.reset_to_defaults")
