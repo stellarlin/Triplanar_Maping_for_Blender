@@ -2,8 +2,11 @@
 ![Title Screenshot](Other/Schemes/title.png)
 ---
 **Author:** Sofiia Prykhach
+
  **Version:** 1.0.0 **
+ 
  Blender Compatibility:** 4.3.0 and later 
+ 
  **Category:** Material
 
 ---
@@ -189,7 +192,7 @@ Set the pair of inputs ("Color {number}", "Color position {number}") using f"col
    2.  Creates 3 `ShaderNodeValToRGB` and 3 `ShaderNodeMix`
    3.  Links nodes to define the custom color ramp workflow.
 
-![Color Ramp](Other/Schemes/color_ramp_group.png')
+![Color Ramp](Other/Schemes/color_ramp_group.png)
        
 
 
