@@ -63,40 +63,7 @@ class ImageProperties(TriplanarMappingProperties):
 
         return texture_node
 
-
-    def update_material(self, context):
-
-        super().update_material(context)
-
-        # Get the active material
-        material = context.object.active_material
-
-        if not material:
-            print(f"No active material found.")
-            return
-
-        # Ensure the material has a node tree
-        if not material.use_nodes or not material.node_tree:
-            print(f"Material does not use nodes.")
-            return
-
-        # Find the Image Texture node
-        nodes = material.node_tree.nodes
-        texture_node = None
-        mapping_node = None
-
-        for node in nodes:
-            if texture_node and mapping_node:
-                break
-            if node.type == 'TEX_IMAGE':  # Look for Image Texture nodes
-                texture_node = node
-            if node.type == 'MAPPING':
-                mapping_node = node
-
-        if not texture_node or not mapping_node:
-            print(f"No Image Texture or Mapping Node found.")
-            return
-
-        # Modify the Blend property
-        texture_node.projection_blend = self.blending
-        mapping_node.inputs['Scale'].default_value = self.mapping_scale
+    def reset(self):
+        super().reset()
+        self.texture = ""
+        self.blending = 0.2
