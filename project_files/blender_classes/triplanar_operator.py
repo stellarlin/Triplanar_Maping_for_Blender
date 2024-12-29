@@ -47,7 +47,7 @@ class ApplyMaterialOperator(bpy.types.Operator):
 class ResetMaterialPropertiesOperator(bpy.types.Operator):
     """Reset Partial Properties to Default"""
     bl_idname = "properties.reset_to_defaults"
-    bl_label = "Reset to Default"
+    bl_label = "Reset the default properties"
     bl_options = {'REGISTER', 'UNDO'}
 
     def execute(self, context):
