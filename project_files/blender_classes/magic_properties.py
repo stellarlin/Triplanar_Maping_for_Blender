@@ -37,9 +37,8 @@ class MagicProperties(PartialProperties):
         )
 
         group.interface.items_tree['Distortion'].default_value = self.distortion
-        group.interface.items_tree['Distortion'].min_value = 0.0
-        group.interface.items_tree['Distortion'].max_value = 0.1
-        group.interface.items_tree['Distortion'].subtype = 'FACTOR'
+        group.interface.items_tree['Distortion'].min_value = -1000
+        group.interface.items_tree['Distortion'].max_value = 1000
 
     def link_inputs(self, links, input_node, mapping_node, texture_node, color_ramp):
         super().link_inputs(links, input_node, mapping_node, texture_node, color_ramp)

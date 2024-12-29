@@ -58,6 +58,7 @@ class PartialProperties(TriplanarMappingProperties):
         )
 
     def create_position_input(self, group, number, panel):
+
         group.interface.new_socket(
             name=f"Color position {number}",
             in_out='INPUT',
@@ -221,7 +222,7 @@ class PartialProperties(TriplanarMappingProperties):
         # create outputs
         self.create_ramp_outputs(node_group)
         output_node = node_group.nodes.new("NodeGroupOutput")
-        output_node.location = (800, 0)
+        output_node.location = (1100, 0)
 
         # Create four color ramp nodes
         color_ramps = self.create_color_ramps(nodes)

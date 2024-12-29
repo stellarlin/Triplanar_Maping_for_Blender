@@ -193,3 +193,5 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
     def reset(self):
         # Reset mapping scale property
         self.mapping_scale = (0.4, 0.4, 0.4)  # Default value
+        self.mapping_location = (0, 0, 0)
+        self.mapping_rotation = (0, 0, 0)

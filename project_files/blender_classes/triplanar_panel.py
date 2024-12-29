@@ -1,7 +1,7 @@
 import bpy
 
 
-class PlanarMappingPanel(bpy.types.Panel):
+class TriplanarMappingPanel(bpy.types.Panel):
     bl_label = "Triplanar Mapping"
     bl_idname = "TRIPLANE_MAPPING_PANEL"
     bl_space_type = "VIEW_3D"

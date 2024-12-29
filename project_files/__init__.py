@@ -30,7 +30,7 @@ import bpy
 classes = [
     properties.TriplanarMappingProperties,
     operator.ApplyMaterialOperator,
-    panel.PlanarMappingPanel,
+    panel.TriplanarMappingPanel,
 ]
 
 
@@ -50,8 +50,8 @@ def register():
 
 
     bpy.utils.register_class(operator.ApplyMaterialOperator)
-    bpy.utils.register_class(operator.ResetMaterialPropertiesOperator)
-    bpy.utils.register_class(panel.PlanarMappingPanel)
+    bpy.utils.register_class(operator.ResetPropertiesOperator)
+    bpy.utils.register_class(panel.TriplanarMappingPanel)
 
     bpy.types.Scene.texture_type = bpy.props.EnumProperty(
         name="Type",
@@ -89,8 +89,8 @@ def unregister():
 
 
     bpy.utils.unregister_class(operator.ApplyMaterialOperator)
-    bpy.utils.unregister_class(operator.ResetMaterialPropertiesOperator)
-    bpy.utils.unregister_class(panel.PlanarMappingPanel)
+    bpy.utils.unregister_class(operator.ResetPropertiesOperator)
+    bpy.utils.unregister_class(panel.TriplanarMappingPanel)
 
     # Unregister properties if needed
     del bpy.types.Scene.image_properties
