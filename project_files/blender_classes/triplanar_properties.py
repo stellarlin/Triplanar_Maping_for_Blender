@@ -18,6 +18,23 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
         subtype='XYZ'  # Display subtype for UI
     )
 
+    mapping_location: bpy.props.FloatVectorProperty(
+        name="Mapping Location",
+        description="Location of mapping center",
+        default=(0.0, 0.0, 0.0),
+        size=3,
+        subtype='TRANSLATION'
+    )
+
+    mapping_rotation: bpy.props.FloatVectorProperty(
+        name="Mapping Rotation",
+        description="Rotation of the texture mapping",
+        default=(0.0, 0.0, 0.0),
+        size=3,
+        subtype='EULER'
+    )
+
+
     def create_texture(self, nodes, material):
         # This method should be implemented by subclasses.
         return nodes.new(type='ShaderNodeTexImage')
@@ -30,13 +47,38 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
         return False
 
     def create_inputs(self, group, texture_panel):
+        mapping_properties = group.interface.new_panel(name="Mapping Properties",
+                                          description='Colors of the Color Ramp and their positions',
+                                          default_closed=False)
         group.interface.new_socket(
             name='Mapping Scale',
             in_out='INPUT',
-            socket_type='NodeSocketVector'
+            socket_type='NodeSocketVector',
+            parent = mapping_properties
         )
+
         group.interface.items_tree['Mapping Scale'].subtype = 'XYZ'
         group.interface.items_tree['Mapping Scale'].default_value = self.mapping_scale
+
+        group.interface.new_socket(
+            name='Mapping Location',
+            in_out='INPUT',
+            socket_type='NodeSocketVector',
+            parent = mapping_properties
+        )
+
+        group.interface.items_tree['Mapping Location'].subtype = 'TRANSLATION'
+        group.interface.items_tree['Mapping Location'].default_value = self.mapping_location
+
+        group.interface.new_socket(
+            name='Mapping Rotation',
+            in_out='INPUT',
+            socket_type='NodeSocketVector',
+            parent = mapping_properties
+        )
+
+        group.interface.items_tree['Mapping Rotation'].subtype = 'EULER'
+        group.interface.items_tree['Mapping Rotation'].default_value = self.mapping_rotation
         return
 
     def create_outputs(self, group):
@@ -48,6 +90,8 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
 
     def link_inputs(self, links, input_node, mapping_node, texture_node, color_ramp):
         links.new(input_node.outputs['Mapping Scale'], mapping_node.inputs['Scale'])
+        links.new(input_node.outputs['Mapping Location'], mapping_node.inputs['Location'])
+        links.new(input_node.outputs['Mapping Rotation'], mapping_node.inputs['Rotation'])
 
     def link_outputs(self, links, output_node,  bsdf_node):
         links.new(output_node.inputs['BSDF'], bsdf_node.outputs["BSDF"])
@@ -63,9 +107,11 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
         links = node_group.links
 
         # Add inputs
+
         texture_panel = node_group.interface.new_panel(name="Texture Properties",
                                           description='Colors of the Color Ramp and their positions',
                                           default_closed=False)
+
 
         self.create_inputs(node_group, texture_panel)
         input_node = nodes.new(type='NodeGroupInput')
@@ -136,7 +182,7 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
 
         # Add a Material Output node
         output_node = nodes.new(type='ShaderNodeOutputMaterial')
-        output_node.location = (1400, 0)
+        output_node.location = (400, 0)
 
         # Connect the diffuse shader to the material output
         links.new(node_group.outputs['BSDF'], output_node.inputs['Surface'])
