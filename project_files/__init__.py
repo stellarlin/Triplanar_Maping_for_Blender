@@ -82,7 +82,7 @@ def unregister():
     bpy.utils.unregister_class(ImageProperties)
     bpy.utils.unregister_class(ColorPositionPair)
     bpy.utils.unregister_class(PartialProperties)
-    bpy.utils.uregister_class(NoiseProperties)
+    bpy.utils.unregister_class(NoiseProperties)
     bpy.utils.unregister_class(VoronoiProperties)
     bpy.utils.unregister_class(MagicProperties)
     bpy.utils.unregister_class(WaveProperties)
