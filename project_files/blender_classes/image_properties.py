@@ -29,6 +29,10 @@ class ImageProperties(TriplanarMappingProperties):
         group.interface.items_tree['Texture Blend'].subtype = 'FACTOR'
         group.interface.items_tree['Texture Blend'].default_value = self.blending
 
+    def link_nodes(self, links, input_node, mapping_node, texture_node, bsdf_node, color_ramp):
+        super().link_nodes(links, input_node, mapping_node, texture_node, bsdf_node, color_ramp)
+        links.new(texture_node.outputs['Color'], bsdf_node.inputs['Base Color'])
+
     def create_texture(self, nodes, material):
         texture_node = nodes.new(type='ShaderNodeTexImage')
         if os.path.isfile(bpy.path.abspath(self.texture)):

@@ -5,7 +5,7 @@ class ColorPositionPair(bpy.types.PropertyGroup):
     color: bpy.props.FloatVectorProperty(
         name="Color",
         subtype='COLOR',
-        default=(1.0, 1.0, 1.0, 1.0),
+        min=0.0, max=1.0,
         size=4,
         description="Color"
     )
@@ -195,19 +195,16 @@ class PartialProperties(TriplanarMappingProperties):
         # Connect Mix to OutputNode
         links.new(mix_nodes[2].outputs['Result'], output_node.inputs['Color'])
 
-    def link_inputs(self, links, input_node, mapping_node, texture_node, color_ramp):
+    def link_nodes(self, links, input_node, mapping_node, texture_node, bsdf_node, color_ramp):
        #connect basic inputs
-       super().link_inputs(links, input_node, mapping_node, texture_node, color_ramp)
+       super().link_nodes(links, input_node, mapping_node, texture_node, bsdf_node, color_ramp)
+       links.new(color_ramp.outputs['Color'], bsdf_node.inputs['Base Color'])
 
        # connect scale
        links.new(input_node.outputs['Scale'], texture_node.inputs['Scale'])
        #connect Colors
        for i in range(1, 5):
             links.new(input_node.outputs[f"Color {i}"], color_ramp.inputs[f"Color {i}"])
-
-    def link_partial(self, links, texture_node, custom_ramp, bsdf_node):
-        links.new(texture_node.outputs['Fac'], custom_ramp.inputs['Fac'])
-        links.new(custom_ramp.outputs['Color'], bsdf_node.inputs['Base Color'])
 
     def create_ramp(self, material):
         node_group = bpy.data.node_groups.new(name="CustomRamp", type="ShaderNodeTree")

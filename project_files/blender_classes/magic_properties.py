@@ -40,14 +40,13 @@ class MagicProperties(PartialProperties):
         group.interface.items_tree['Distortion'].min_value = -1000
         group.interface.items_tree['Distortion'].max_value = 1000
 
-    def link_inputs(self, links, input_node, mapping_node, texture_node, color_ramp):
-        super().link_inputs(links, input_node, mapping_node, texture_node, color_ramp)
+    def link_nodes(self, links, input_node, mapping_node, texture_node, bsdf_node, color_ramp):
+        super().link_nodes(links, input_node, mapping_node, texture_node, bsdf_node, color_ramp)
+        links.new(texture_node.outputs['Fac'], color_ramp.inputs['Fac'])
         links.new (input_node.outputs['Distortion'], texture_node.inputs['Distortion'])
 
     def create_texture(self, nodes, material):
         magic_node = nodes.new(type='ShaderNodeTexMagic')
-        # todo test seting driver of depth
-
         # Create a driver for the procedural_blend property
 
         driver = magic_node.driver_add('turbulence_depth').driver

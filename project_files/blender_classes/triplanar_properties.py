@@ -12,8 +12,8 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
         name="Mapping Scale",
         description="Scale along X, Y, Z axes",
         default=(0.4, 0.4, 0.4),  # Default scale
-        min=0.0,  # Minimum allowed value
-        max=3.0,  # Maximum allowed value
+        min=-1000,  # Minimum allowed value
+        max=1000,  # Maximum allowed value
         size=3,  # Number of components (X, Y, Z)
         subtype='XYZ'  # Display subtype for UI
     )
@@ -88,17 +88,10 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
             socket_type='NodeSocketShader'
     )
 
-    def link_inputs(self, links, input_node, mapping_node, texture_node, color_ramp):
+    def link_nodes(self, links, input_node, mapping_node, texture_node, bsdf_node, color_ramp):
         links.new(input_node.outputs['Mapping Scale'], mapping_node.inputs['Scale'])
         links.new(input_node.outputs['Mapping Location'], mapping_node.inputs['Location'])
         links.new(input_node.outputs['Mapping Rotation'], mapping_node.inputs['Rotation'])
-
-    def link_outputs(self, links, output_node,  bsdf_node):
-        links.new(output_node.inputs['BSDF'], bsdf_node.outputs["BSDF"])
-        return
-
-    def link_partial(self, links, texture_node, custom_ramp, bsdf_node):
-        return
 
     def create_group (self,  material):
 
@@ -139,26 +132,19 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
         texture_node = self.create_texture(nodes, material)
         texture_node.location = (400, 0)
 
+        # Create  texture and (optionally)color_ramp and connect them to other nodes and inputs
         if self.partial():
             custom_ramp = nodes.new('ShaderNodeGroup')
             custom_ramp.node_tree = self.create_ramp(material)
             custom_ramp.location = (800, 0)
-
-            self.link_partial(links, texture_node, custom_ramp, bsdf_node)
-            self.link_inputs(links, input_node, mapping_node, texture_node, custom_ramp)
+            self.link_nodes(links, input_node, mapping_node, texture_node, bsdf_node, custom_ramp)
         else:
-            links.new(texture_node.outputs['Color'], bsdf_node.inputs['Base Color'])
-            self.link_inputs(links, input_node, mapping_node, texture_node, None)
+            self.link_nodes(links, input_node, mapping_node, texture_node, bsdf_node, None)
 
-
-        # Connect the Texture Coordinate node to the Mapping node
+        #Connect the rest nodes of standard triplanar implementation
         links.new(texture_coord_node.outputs['Generated'], mapping_node.inputs['Vector'])
-        # Connect the Mapping node to the Texture node
         links.new(mapping_node.outputs['Vector'], texture_node.inputs['Vector'])
-        # Connect the combined RGB to the diffuse shader
-
-
-        self.link_outputs(links, output_node, bsdf_node)
+        links.new(output_node.inputs['BSDF'], bsdf_node.outputs["BSDF"])
 
         return node_group
 

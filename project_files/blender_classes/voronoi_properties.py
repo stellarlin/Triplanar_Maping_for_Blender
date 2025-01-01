@@ -60,15 +60,14 @@ class VoronoiProperties(PartialProperties):
         group.interface.items_tree['Randomness'].max_value = 0.1
         group.interface.items_tree['Randomness'].subtype = 'FACTOR'
 
-    def link_inputs(self, links, input_node, mapping_node, texture_node, color_ramp):
-        super().link_inputs(links, input_node, mapping_node, texture_node, color_ramp)
+    def link_nodes(self, links, input_node, mapping_node, texture_node, bsdf_node, color_ramp):
+        super().link_nodes(links, input_node, mapping_node, texture_node, bsdf_node, color_ramp)
+        links.new(texture_node.outputs['Color'], color_ramp.inputs['Fac'])
+
         links.new (input_node.outputs['Detail'], texture_node.inputs['Detail'])
         links.new (input_node.outputs['Roughness'], texture_node.inputs['Roughness'])
         links.new (input_node.outputs['Randomness'], texture_node.inputs['Randomness'])
 
-    def link_partial(self, links, texture_node, custom_ramp, bsdf_node):
-        links.new(texture_node.outputs['Color'], custom_ramp.inputs['Fac'])
-        links.new(custom_ramp.outputs['Color'], bsdf_node.inputs['Base Color'])
 
     def create_texture(self, nodes, material):
         voronoi_node= nodes.new(type="ShaderNodeTexVoronoi")

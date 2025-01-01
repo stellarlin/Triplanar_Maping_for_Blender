@@ -131,9 +131,10 @@ class WaveProperties(PartialProperties):
 
 
 
-    def link_inputs(self, links, input_node, mapping_node, texture_node, color_ramp):
-        super().link_inputs(links, input_node, mapping_node, texture_node, color_ramp)
-       # todo wave set inputs
+    def link_nodes(self, links, input_node, mapping_node, texture_node, bsdf_node, color_ramp):
+        super().link_nodes(links, input_node, mapping_node, texture_node, bsdf_node, color_ramp)
+        links.new(texture_node.outputs['Fac'], color_ramp.inputs['Fac'])
+
         links.new (input_node.outputs['Detail'], texture_node.inputs['Detail'])
         links.new(input_node.outputs['Detail Scale'], texture_node.inputs['Detail Scale'])
         links.new (input_node.outputs['Detail Roughness'], texture_node.inputs['Detail Roughness'])

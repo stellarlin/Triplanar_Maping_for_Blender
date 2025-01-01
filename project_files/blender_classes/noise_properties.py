@@ -60,8 +60,9 @@ class NoiseProperties(PartialProperties):
         group.interface.items_tree['Distortion'].max_value = 0.1
         group.interface.items_tree['Distortion'].subtype = 'FACTOR'
 
-    def link_inputs(self, links, input_node, mapping_node, texture_node, color_ramp):
-        super().link_inputs(links, input_node, mapping_node, texture_node, color_ramp)
+    def link_nodes(self, links, input_node, mapping_node, texture_node, bsdf_node, color_ramp):
+        super().link_nodes(links, input_node, mapping_node, texture_node, bsdf_node, color_ramp)
+        links.new(texture_node.outputs['Fac'], color_ramp.inputs['Fac'])
         links.new (input_node.outputs['Detail'], texture_node.inputs['Detail'])
         links.new (input_node.outputs['Roughness'], texture_node.inputs['Roughness'])
         links.new (input_node.outputs['Distortion'], texture_node.inputs['Distortion'])
