@@ -8,7 +8,7 @@
  **Blender Compatibility:** 4.3.0 and later 
  
  **Category:** Material
-
+ 
 ---
 ## **Overview**
 
@@ -30,7 +30,6 @@ The aim is to streamline the creation and manipulation of textures with minimal 
 
 ---
 
----
 ## **Getting Started**
 
 ### **Installation**
@@ -59,83 +58,250 @@ In the panel, there will be a dropdown menu labeled Type. This is where you can 
 8. After applying, modify the material in the `Material Settings > Surface` if needed.
  
 
-![Example Screenshot](link_to_image)
+#### Apply Image Texture Tutorial:
 
+
+####  Apply Noise Texture Tutorial:
+
+####  Apply Voronoi Texture Tutorial:
+
+
+####  Apply Wave Texture Tutorial:
+
+####  Apply Magic Texture Tutorial:
 ---
-## Technical Documentation 
-### 1. File Structure
-- **`program_files/__init__.py`**:
- This file serves as the initialization script for the add-on.
- - **`program_files/blender_classes/`** :
-Directory contains all the Python files responsible for the main logic of the add-on
-	 - **`triplanar_panel.py`**
-    	The file contains the UI panel, that allows users to configure texture properties according to the chosen type.
-	 - **`triplanar_operator.py`**
-    	Contains two operators:
-		1. Operator `ApplyMaterialOperator` generates a material and applies it to the selected meshes. 
-		2. Operator `ResetPropertiesOperator` resets a selected texture property to its default values.
-	- **`triplanar_properties.py`**
-   	Serves as the base class for all texture-related properties in the add-on. By inheriting from this  class, other property classes can easily reuse methods like `create_group` and other
-	- **`image_properties.py`**
-   	Provides properties related to image textures.
-	- **`partial_properties.py`**
-   	This is the base class that provides common functionality for partial generated texture properties. It contains logic for creating and linking  inputs, outputs and handling color ramps.
-	- **`noise_properties.py`**
-   	Contains properties for generating noise textures.
-	- **`wave_properties.py`**
-  	Provides properties for wave-based textures.
-	- **`magic_properties.py`**
-   	Contains properties for generating magic textures
-	- **`voronoi_properties.py`**
-   	Contains properties related to Voronoi textures.
+# Technical Documentation 
 
----
-### 2. Core Principles 
+## Core Principles 
+The types of materials that can be mapped using this add-on are grouped into two main categories:
 
-//todo desctiption
+ - **Partially Generated Textures**:
+Includes procedural textures such as Noise, Wave, Voronoi, and Magic textures.
+- **Image Textures**:
+Use external images as the texture source.
 
+The implementation for both categories is similar at the `ShaderNodeTree` level. The main difference lies in the use of the `CustomRamp`, which provides advanced coloring options for partially generated textures. This design decision led to the use of inheritance for organizing code effectively.
+
+
+### Inheritance
+This project is designed with modularity in mind, enabling the easy addition of new texture types and properties without requiring significant changes to the existing codebase.
+
+The **`TriplanarMappingProperties`** class provides the foundational structure for the material node tree. Its child classes define specific texture nodes and their inputs, create necessary drivers, and establish connections between inputs and nodes.
+The **`PartialProperties`** class introduces the `ShaderNodeGroup` for the custom ramp, which is essential for all its child classes (e.g., Noise, Wave).
+
+*`(All details about texture types, panels, and the implementation of the custom ramp are described in the subsequent Core Classes section).`*
+
+### Properties
+Properties for each mapping type (available both in the add-on panel and the material nodes) are divided into three main segments:
+
+- **Texture Properties** :
+These store parameters specific to the texture type, such as scale, detail, roughness, etc. This segment is unique to each texture type.
+- **Mapping Properties**:
+This segment is universal and helps users control the mapping of textures for seamless transitions across surfaces.
+- **Color Properties**:
+An additional group of properties that control the coloring of partially generated materials.  Contains 4 pairs of color value and their position in the Color Ramp
+
+
+
+### Illustration
+The following class diagram demonstrates the relationships and dependencies within the project:
 ```mermaid
 classDiagram
+    direction TB
+    
     class TriplanarMappingProperties {
         <<bpy.types.PropertyGroup>>
+        StringProperty name
+        FloatVectorProperty mapping_scale
+        FloatVectorProperty mapping_location
+        FloatVectorProperty mapping_rotation
+        create_texture(nodes, material)*
+        create_ramp(material)*
+        partial()*
+        create_inputs(group, texture_panel)*
+        create_outputs(group)
+        link_nodes(links, input_node, mapping_node, texture_node, bsdf_node, color_ramp)*
+        create_group(material)
+        create_material()
+        reset()*
     }
 
     class PartialProperties {
         <<inherits TriplanarMappingProperties>>
+        FloatProperty scale
+        PointerProperty color_pair_1
+        PointerProperty color_pair_2
+        PointerProperty color_pair_3
+        PointerProperty color_pair_4
+        partial()
+        create_inputs(group, texture_panel)
+        link_nodes(links, input_node, mapping_node, texture_node, bsdf_node, color_ramp)*
+        create_ramp(material)()
+        reset()
+        init_default_colors()
+        create_color_input(group, number, panel)
+        create_position_input(group, number, panel)
+        set_color_pair_input(group, number)
+        create_partial_inputs(group, texture_panel)
+        create_ramp_inputs(group)
+        create_ramp_outputs(group)
+        create_color_ramps(nodes)
+        create_mix(nodes)
+        create_ramp_drivers(color_ramps, material)
+        link_ramp(input_node, output_node, links, color_ramps, mix_nodes)
     }
 
     class ImageProperties {
         <<inherits TriplanarMappingProperties>>
-    }
-
-    class NoiseProperties {
-        <<inherits PartialProperties>>
-    }
-
-    class VoronoiProperties {
-        <<inherits PartialProperties>>
-    }
-
-    class WaveProperties {
-        <<inherits PartialProperties>>
+        StringProperty texture
+        FloatProperty blending
+        create_inputs(group, texture_panel)
+        link_nodes(links, input_node, mapping_node, texture_node, bsdf_node, color_ramp)*
+        create_texture(nodes, material)
+        reset()
     }
 
     class MagicProperties {
         <<inherits PartialProperties>>
+        IntProperty depth
+        FloatProperty distortion
+        create_partial_inputs(group, texture_panel)
+        link_nodes(links, input_node, mapping_node, texture_node, bsdf_node, color_ramp)*
+        create_texture(nodes, material)
+        reset()
+    }
+
+    class NoiseProperties {
+        <<inherits PartialProperties>>
+        FloatProperty detail
+        FloatProperty roughness
+        FloatProperty distortion
+        create_partial_inputs(group, texture_panel)
+        link_nodes(links, input_node, mapping_node, texture_node, bsdf_node, color_ramp)*
+        create_texture(nodes, material)
+        reset()
+    }
+
+    class VoronoiProperties {
+        <<inherits PartialProperties>>
+        FloatProperty detail
+        FloatProperty roughness
+        FloatProperty randomness
+        create_partial_inputs(group, texture_panel)
+        link_nodes(links, input_node, mapping_node, texture_node, bsdf_node, color_ramp)*
+        create_texture(nodes, material)
+        reset()
+    }
+
+    class WaveProperties {
+        <<inherits PartialProperties>>
+        EnumProperty wave_type
+        EnumProperty bands_direction
+        EnumProperty rings_direction
+        EnumProperty wave_profile
+        FloatProperty distortion
+        FloatProperty detail
+        FloatProperty detail_scale
+        FloatProperty detail_roughness
+        create_partial_inputs(group, texture_panel)
+        link_nodes(links, input_node, mapping_node, texture_node, bsdf_node, color_ramp)*
+        create_texture(nodes, material)
+        reset()
+    }
+
+    class TriplanarMappingPanel {
+        <<bpy.types.Panel>>
+        String bl_label
+        String bl_idname
+        String bl_space_type
+        String bl_region_type
+        String bl_category
+        draw_tex_image(layout, prop)*
+        draw_colors(layout, prop)*
+        draw_mapping(layout, prop)*
+        draw_noise(layout, prop)*
+        draw_voronoi(layout, prop)*
+        draw_wave(layout, prop)*
+        draw_magic(layout, prop)*
+        draw(context)*
+    }
+
+    class ColorPositionPair {
+        <<bpy.types.PropertyGroup>>
+        FloatVectorProperty color
+        FloatProperty position
+    }
+
+    class ApplyMaterialOperator {
+        <<bpy.types.Operator>>
+        String bl_idname
+        String bl_label
+        String bl_description
+        String bl_options
+        execute(context)
+    }
+
+    class ResetPropertiesOperator {
+        <<bpy.types.Operator>>
+        String bl_idname
+        String bl_label
+        String bl_options
+        execute(context)
+    }
+
+    class choose_properties {
+        <<static>>
+        choose_properties(context)
     }
 
     TriplanarMappingProperties <|-- PartialProperties
     TriplanarMappingProperties <|-- ImageProperties
+    PartialProperties <|-- MagicProperties
     PartialProperties <|-- NoiseProperties
     PartialProperties <|-- VoronoiProperties
     PartialProperties <|-- WaveProperties
-    PartialProperties <|-- MagicProperties
+
+    %% Link ColorPositionPair to PartialProperties
+    PartialProperties --> ColorPositionPair
+    TriplanarMappingPanel --> TriplanarMappingProperties
+    ApplyMaterialOperator --> choose_properties
+    ResetPropertiesOperator --> choose_properties
+
 ```
 
 
+## File Structure
+
+**`program_files/__init__.py`**  
+Initializes the add-on and registers necessary classes and operators.
+
+**`program_files/blender_classes/`**  
+Contains Python modules for the add-on's core logic and functionality:  
+- **`triplanar_panel.py`**  
+  Defines the user interface panel for configuring texture properties.  
+- **`triplanar_operator.py`**  
+  Implements two operators:  
+  1. `ApplyMaterialOperator`: Generates and applies materials to selected meshes.  
+  2. `ResetPropertiesOperator`: Resets texture properties to their default values.  
+- **`triplanar_properties.py`**  
+  Serves as the base class for texture-related properties, providing reusable methods like `create_group`.  
+- **`image_properties.py`**  
+  Manages properties specific to image textures.  
+- **`partial_properties.py`**  
+  Provides shared functionality for partial texture generation, including input/output creation and color ramp handling.  
+- **`noise_properties.py`**  
+  Defines properties for generating noise textures.  
+- **`wave_properties.py`**  
+  Manages properties for wave-based textures.  
+- **`magic_properties.py`**  
+  Contains properties for creating magic textures.  
+- **`voronoi_properties.py`**  
+  Handles properties for Voronoi texture generation.  
 ---
-### 3. Core Classes and Inheritance Structure
-#### 3.1 TriplanarMappingProperties
+
+## Core Classes and Inheritance Structure
+
+### 1. TriplanarMappingProperties
 
 The `TriplanarProperties`is a base class designed to provide essential functionality for subclasses representing specific texture types. Generates a complete material node tree based on triplanar mapping. Ensures accurate connections between texture coordinate, mapping, texture, and shader nodes.
 
@@ -171,11 +337,7 @@ Provides a default implementation for creating texture nodes. This method is int
 
 5. `create_outputs(self, group)`: Adds an output socket to the node group for the shader.
    
-6.  **`link_inputs(self, links, input_node, mapping_node, texture_node, color_ramp)`**: Connects input properties to the mapping, texture, and ramp nodes, enabling seamless integration.
-
-7. `link_outputs(self, links, output_node, bsdf_node)`: Links the shader node to the output node.
-
-8. `link_partial(self, links, texture_node, custom_ramp, bsdf_node)`: Placeholder for linking nodes in partial texture setups. Meant to be overridden by subclasses.
+6. `link_nodes(self, links, input_node, mapping_node, texture_node, bsdf_node, color_ramp)` : Connects input properties, color ramp and nodes, enabling seamless integration.
 
 9. **`create_group(self, material)`**: Generates a node group inside a material that provides triplanar mapping functionality. This method creates and links nodes, inputs and outputs of the group. The `texture_node`, created by the `create_texture(self, nodes, material)` method, is unique for each subclass of the property group. Additionally, for partial generation, supports optional integration of custom color ramps via `partial` and `create_ramp` methods
 
@@ -196,12 +358,13 @@ Provides a default implementation for creating texture nodes. This method is int
 	**Returns**: The created material.
 
 12. **`reset(self)`**: Resets all properties to their default values. This method is intended to be overridden by subclasses for specific texture types.
-
-#### 3.2 PartialProperties
+---
+### 3. PartialProperties
 
 `PartialProperties` is a subclass of `TriplanarMappingProperties` designed for generating custom triplanar texture properties with support for partial texture creation. It introduces additional features, including a custom color ramp with up to 4 configurable color-position pairs that is configurable outside the node group
 
----
+#### Custom Ramp Node Group:
+![Color Ramp](Other/Schemes/color_ramp_group.png)
 
  #### Properties
 - `scale`: Controls the scale of the texture.
@@ -211,8 +374,6 @@ Provides a default implementation for creating texture nodes. This method is int
 
 - `color_pair_1`, `color_pair_2`, `color_pair_3`, `color_pair_4`: Defines color-position pairs for the custom color ramp.
 	- Type: `PointerProperty` (to `ColorPositionPair`)
-
----
 
  #### Methods
 
@@ -245,8 +406,8 @@ Set the pair of inputs ("Color {number}", "Color position {number}") using f"col
    1.  Adds input and output sockets.
    2.  Creates 3 `ShaderNodeValToRGB` and 3 `ShaderNodeMix`
    3.  Links nodes to define the custom color ramp workflow.
-
-![Color Ramp](Other/Schemes/color_ramp_group.png)
        
+---
+
 
 
