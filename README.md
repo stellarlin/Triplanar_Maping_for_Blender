@@ -46,14 +46,12 @@ The aim is to streamline the creation and manipulation of textures with minimal 
 In the panel, there will be a dropdown menu labeled Type. This is where you can select the kind of texture you want to apply to your object.
 5. Select a Texture Type
 6. The Type dropdown menu offers several texture options:
-	  * **None**: No texture is applied.
 	  * **Image**: Allows you to use an external image file as a texture.
 	  * **Noise**: Generates a procedural noise texture.
 	  * Voronoi: Uses the Voronoi pattern, great for creating cellular textures.
 	  * **Waves**: Applies a wave-based texture.
 	  * **Magic**: Applies a magic-like texture.
-5. Adjust the material settings to your preference.
-6. Optionally, reset settings to defaults as needed.
+5. Adjust the material settings to your preference or reset settings to defaults.
 7. Click the 'Apply' button to apply the material to the selected objects.
 8. After applying, modify the material in the `Material Settings > Surface` if needed.
  
@@ -364,6 +362,10 @@ Provides a default implementation for creating texture nodes. This method is int
 
 The `ImageProperties` class is a specialized subclass of `TriplanarMappingProperties` for handling image-based textures. This class manages the loading, customization, and application of external image files as textures.
 
+![Image Group](Other/Schemes/image_input.png)
+![Image Tree](Other/Schemes/image_tree.png)
+
+
 #### Properties:
 - **`image_file`**: A `StringProperty` representing the file path to the image texture.
 - **`blending`**: A `FloatProperty` for controlling the blend intensity between the triplanar projections.
@@ -402,7 +404,7 @@ The `ImageProperties` class is a specialized subclass of `TriplanarMappingProper
    2.  Creates 3 `ShaderNodeValToRGB` and 3 `ShaderNodeMix`
    3.  Links nodes to define the custom color ramp workflow.
 
-       
+- `create_partial_inputs(self, group, texture_panel)`: Function to create inputs of subclasses between scale input and color inputs. This method is intended to be overridden by subclasses for specific texture types.       
 - Related to creation of custom color ramp:
 	- `init_default_colors(self)`: Initializes the default colors and positions for the color pairs.
 	- `create_color_input(self, group, number, panel)`:
@@ -411,7 +413,6 @@ The `ImageProperties` class is a specialized subclass of `TriplanarMappingProper
  	Creates a "Color position {number}" input of type 'NodeSocketFloat' inside the  group
 	- `set_color_pair_input (self, group, number)`:
 	Set the pair of inputs ("Color {number}", "Color position {number}") using f"color_pair_{number}" property
-	- `create_partial_inputs(self, group, texture_panel)`: Function to create inputs of subclasses between scale input and color inputs. This method is intended to be overridden by subclasses for specific texture types.
 	- `create_ramp_inputs(self, group)`: creates inputs for the color ramp group
 	- `create_ramp_outputs(self, group)`: creates outputs for the color ramp group
 	- `create_color_ramps(self, nodes)`: creates 3 `ShaderNodeValToRGB`
@@ -424,6 +425,171 @@ The `ImageProperties` class is a specialized subclass of `TriplanarMappingProper
 	- `link_ramp(self, input_node, output_node, links, color_ramps, mix_nodes)`: Connects  nodes inside the ramp
 
 ---
+### **4. NoiseProperties**
+The `NoiseProperties` class is a child of `PartialProperties`, designed to generate procedural noise textures.
+
+![Noise Group](Other/Schemes/noise_input.png)
+![Noise Tree](Other/Schemes/noise_tree.png)
 
 
+#### **Properties**
+- `Detail`  
+  - *Type:* `FloatProperty`  
+  - *Description:* Controls the level of detail in the noise texture. Higher values result in more intricate patterns.  
+  - *Default:* 5  
+  - *Range:* -1000 to 1000  
+
+- `Roughness`  
+  - *Type:* `FloatProperty`  
+  - *Description:* Adjusts the roughness of the noise pattern, ranging from smooth to coarse.  
+  - *Default:* 0.5  
+  - *Range:* 0.0 to 1.0  
+
+- `Distortion`  
+  - *Type:* `FloatProperty`  
+  - *Description:* Applies a distortion effect to the noise pattern, altering its uniformity.  
+  - *Default:* 0  
+  - *Range:* 0.0 to 1.0  
+
+#### Methods
+
+- **`create_texture(nodes, material)`**  
+  Generates a `ShaderNodeTexNoise` node configured for 3D noise, normalized for consistency, and set to `FBM` type for enhanced pattern variability.
+
+---
+### **5. VoronoiProperties**
+The `VoronoiProperties` class is a child of `PartialProperties`, designed specifically for creating and managing Voronoi textures. 
+
+![Voronoi Group](Other/Schemes/voronoi_input.png)
+![Voronoi Tree](Other/Schemes/voronoi_tree.png)
+
+
+#### **Properties**
+- `Detail`
+  - *Type:* `FloatProperty`  
+  - *Description:* Controls the level of detail in the Voronoi texture. Higher values produce more intricate cellular structures.  
+  - *Default:* 5  
+  - *Range:* -1000 to 1000  
+
+- `Roughness` 
+  - *Type:* `FloatProperty`  
+  - *Description:* Defines the roughness of the texture, varying from smooth to uneven.  
+  - *Default:* 0.5  
+  - *Range:* 0.0 to 1.0  
+
+- `Randomness`  
+  - *Type:* `FloatProperty`  
+  - *Description:* Adjusts the randomness of the Voronoi pattern, influencing the uniformity of the cells.  
+  - *Default:* 0.5  
+  - *Range:* 0.0 to 1.0  
+
+#### **Methods**
+
+- **`create_texture(nodes, material)`**  
+  Creates a `ShaderNodeTexVoronoi` node configured with the following defaults:  
+  - Feature: `F1`  
+  - Distance: `MANHATTAN`  
+  - Dimensions: `3D`  
+  - Normalized output enabled  
+
+---
+### **6. WaveProperties**
+The `WaveProperties` class is an extension of `PartialProperties`, focusing on the generation and management of wave patterns. It provides a  various types, profiles, and directional settings.
+
+![Wave Group](Other/Schemes/wave_inputs.png)
+![Wave Tree](Other/Schemes/wave_tree.png)
+
+
+#### **Properties**
+- `Wave Type`
+  - *Type:* `EnumProperty`  
+  - *Description:* Determines the type of wave pattern to generate. Cannot be modified after material creation. Options include:  
+    - `BANDS`: Linear wave bands.  
+    - `RINGS`: Concentric wave rings.  
+  - *Default:* `BANDS`  
+
+- `*Bands Direction` *(Only for `BANDS` Wave Type)*  
+  - *Type:* `EnumProperty`  
+  - *Description:* Specifies the alignment of wave bands along axes or diagonally.Cannot be modified after material creation.  Options include:  
+    - `X`, `Y`, `Z`: Align bands along specific axes.  
+    - `DIAGONAL`: Align bands diagonally.  
+  - *Default:* `X`  
+
+- `Rings Direction` *(Only for `RINGS` Wave Type)*  
+  - *Type:* `EnumProperty`  
+  - *Description:* Sets the alignment of wave rings.Cannot be modified after material creation. Options include:  
+    - `X`, `Y`, `Z`: Align rings along specific axes.  
+    - `SPHERICAL`: Align rings spherically.  
+  - *Default:* `X`  
+
+- `Wave Profile`
+  - *Type:* `EnumProperty`  
+  - *Description:* Defines the mathematical profile of the wave. Cannot be modified after material creation. Options include:  
+    - `SIN`: Sine wave.  
+    - `SAW`: Sawtooth wave.  
+    - `TRI`: Triangle wave.  
+  - *Default:* `SIN`  
+
+- `Distortion` 
+  - *Type:* `FloatProperty`  
+  - *Description:* Controls the distortion applied to the wave texture.  
+  - *Default:* 5.5  
+  - *Range:* -1000 to 1000  
+
+- `Detail` 
+  - *Type:* `FloatProperty`  
+  - *Description:* Sets the detail level of the wave texture.  
+  - *Default:* 5  
+  - *Range:* -1000 to 1000  
+
+- `Detail Scale`
+  - *Type:* `FloatProperty`  
+  - *Description:* Adjusts the scale of the detail in the wave texture.  
+  - *Default:* 0.5  
+  - *Range:* -1000 to 1000  
+
+- `Detail Roughness`
+  - *Type:* `FloatProperty`  
+  - *Description:* Controls the roughness of the texture detail.  
+  - *Default:* 0.5  
+  - *Range:* 0.0 to 1.0  
+
+#### **Methods**
+- **`create_texture(nodes, material)`**  
+  Creates a `ShaderNodeTexWave` node with the following configurations:  
+    - Wave Type: `BANDS` or `RINGS` (as specified).  
+    - Wave Profile: `SIN`, `SAW`, or `TRI`.  
+    - Directional settings based on the chosen wave type.  
+
+---
+Here is the addition of the `MagicProperties` class in the same manner as the other texture classes:
+
+---
+
+### **7. MagicProperties**
+
+The `MagicProperties` class is a subclass of `PartialProperties`, designed to generate and manage turbulent, magical noise textures with customizable depth and distortion parameters.
+
+![Magic Group](Other/Schemes/magic_input.png)
+![Magic Tree](Other/Schemes/magic_tree.png)
+
+#### **Properties**
+- `Depth`  
+  - *Type:* `IntProperty`  
+  - *Description:* Specifies the level of detail in the turbulent noise texture. Higher values introduce more complexity.  
+  - *Default:* 4  
+  - *Range:* 1 to 10  
+
+- `Distortion`  
+  - *Type:* `FloatProperty`  
+  - *Description:* Controls the amount of distortion applied to the magic texture.  
+  - *Default:* 3  
+  - *Range:* 0.0 to 1.0  
+
+#### **Methods**
+
+- **`create_texture(self, nodes, material)`**  
+  Creates a `ShaderNodeTexMagic` node and sets up a driver for the `turbulence_depth` property. 
+
+  **Returns:** The created `ShaderNodeTexMagic` node.
 
