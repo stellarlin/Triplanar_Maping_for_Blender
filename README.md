@@ -153,7 +153,7 @@ classDiagram
 
     class ImageProperties {
         <<inherits TriplanarMappingProperties>>
-        StringProperty texture
+        StringProperty image_file
         FloatProperty blending
         create_inputs(group, texture_panel)
         link_nodes(links, input_node, mapping_node, texture_node, bsdf_node, color_ramp)*
@@ -301,7 +301,7 @@ Contains Python modules for the add-on's core logic and functionality:
 
 ## Core Classes and Inheritance Structure
 
-### 1. TriplanarMappingProperties
+### 1. ` TriplanarMappingProperties` 
 
 The `TriplanarProperties`is a base class designed to provide essential functionality for subclasses representing specific texture types. Generates a complete material node tree based on triplanar mapping. Ensures accurate connections between texture coordinate, mapping, texture, and shader nodes.
 
@@ -324,22 +324,21 @@ The `TriplanarProperties`is a base class designed to provide essential functiona
 	   -   UI Subtype: `EULER`
 
 #### Methods
-1. **`create_texture(self, nodes, material)`**: 
+- **`create_texture(self, nodes, material)`**: 
 Provides a default implementation for creating texture nodes. This method is intended to be overridden by subclasses for specific texture types.
+
 **Returns:** A new texture node, default type is`ShaderNodeTexImage`.
 
-2. **`create_inputs(self, group, texture_panel)`**: Dynamically creates input sockets for subclass properties 
-**Returns**: A new node group of type `ShaderNodeTree`.
-3. **` partial(self)`**: Indicates whether the material will contain partially generated texture. Subclasses can override this method. 
+- **`create_inputs(self, group, texture_panel)`**: Dynamically creates input sockets for subclass properties 
+- **` partial(self)`**: Indicates whether the material will contain partially generated texture. Subclasses can override this method. 
+
 **Returns**: `False` (default behavior).
 
-4.  `create_inputs(self, group, texture_panel)`Adds input sockets to the node group, optionally add them to texture panel
-
-5. `create_outputs(self, group)`: Adds an output socket to the node group for the shader.
+- `create_outputs(self, group)`: Adds an output socket to the node group for the shader.
    
-6. `link_nodes(self, links, input_node, mapping_node, texture_node, bsdf_node, color_ramp)` : Connects input properties, color ramp and nodes, enabling seamless integration.
+- `link_nodes(self, links, input_node, mapping_node, texture_node, bsdf_node, color_ramp)` : Connects input properties, color ramp and nodes, enabling seamless integration.
 
-9. **`create_group(self, material)`**: Generates a node group inside a material that provides triplanar mapping functionality. This method creates and links nodes, inputs and outputs of the group. The `texture_node`, created by the `create_texture(self, nodes, material)` method, is unique for each subclass of the property group. Additionally, for partial generation, supports optional integration of custom color ramps via `partial` and `create_ramp` methods
+- **`create_group(self, material)`**: Generates a node group inside a material that provides triplanar mapping functionality. This method creates and links nodes, inputs and outputs of the group. The `texture_node`, created by the `create_texture(self, nodes, material)` method, is unique for each subclass of the property group. Additionally, for partial generation, supports optional integration of custom color ramps via `partial` and `create_ramp` methods
 
 	**Steps**:
     1.  Adds input and output sockets.
@@ -348,7 +347,7 @@ Provides a default implementation for creating texture nodes. This method is int
 
 	**Returns**: The created node group.
 
-10. **`create_material(self)`**: Generates a new material using the node group created by `create_group()`.
+- **`create_material(self)`**: Generates a new material using the node group created by `create_group()`.
 
 	**Steps**:
     1.  Creates a new material.
@@ -357,7 +356,22 @@ Provides a default implementation for creating texture nodes. This method is int
 
 	**Returns**: The created material.
 
-12. **`reset(self)`**: Resets all properties to their default values. This method is intended to be overridden by subclasses for specific texture types.
+- **`reset(self)`**: Resets all properties to their default values. This method is intended to be overridden by subclasses for specific texture types.
+
+---
+
+### 2. `ImageProperties` 
+
+The `ImageProperties` class is a specialized subclass of `TriplanarMappingProperties` for handling image-based textures. This class manages the loading, customization, and application of external image files as textures.
+
+#### Properties:
+- **`image_file`**: A `StringProperty` representing the file path to the image texture.
+- **`blending`**: A `FloatProperty` for controlling the blend intensity between the triplanar projections.
+
+#### Methods:
+- **`create_texture(nodes, material)`**:
+  Generates the `ShaderNodeTexImage` and configures its parameters using the `texture` and `blending` properties. Creats a driver to manipulate 'Blend' parameter;
+  
 ---
 ### 3. PartialProperties
 
@@ -376,37 +390,39 @@ Provides a default implementation for creating texture nodes. This method is int
 	- Type: `PointerProperty` (to `ColorPositionPair`)
 
  #### Methods
+ - `partial(self)` Indicates that this material uses partial texture creation.
 
-1. `init_default_colors(self)`: Initializes the default colors and positions for the color pairs.
-
-2. `partial(self)` Indicates that this material uses partial texture creation.
 **Returns**: `True`
-3. `create_color_input(self, group, number, panel)`:
-Creates a f"Color {number}" input of type 'NodeSocketColor' inside the group. 
-4. `create_position_input(self, group, number, panel)`:
- Creates a "Color position {number}" input of type 'NodeSocketFloat' inside the  group
-5. `set_color_pair_input (self, group, number)`:
-Set the pair of inputs ("Color {number}", "Color position {number}") using f"color_pair_{number}" property
-6. `create_partial_inputs(self, group, texture_panel)`: Function to create inputs of subclasses between scale input and color inputs. This method is intended to be overridden by subclasses for specific texture types.
 
-7. `create_ramp_inputs(self, group)`: creates inputs for the color ramp group
-8. `create_ramp_outputs(self, group)`: creates outputs for the color ramp group
-9. `create_color_ramps(self, nodes)`: creates 3 `ShaderNodeValToRGB`
-**Returns:** array of `ShaderNodeValToRGB`
-10.  `create_mix (self, nodes)`: creates 3 `ShaderNodeMix`
-11. **Returns:** array of `ShaderNodeMix`
-12. `create_ramp_drivers(self, color_ramps, material)`: creates a driver for 4 different color stops
-13. `link_ramp(self, input_node, output_node, links, color_ramps, mix_nodes)`: Connects  nodes inside the ramp
+- `create_ramp(self, material)`: Creates a custom color ramp node group for partial materials.
 
-14.  `link_partial(self, links, texture_node, custom_ramp, bsdf_node)`: Connects the texture node's color output to the custom ramp's input.Links the custom ramp's output to the BSDF node's Base Color input.
-
-16. `create_ramp(self, material)`: Creates a custom color ramp node group for partial materials.
 **Returns**: A new node group of type `ShaderNodeTree`.
 **Steps**:
    1.  Adds input and output sockets.
    2.  Creates 3 `ShaderNodeValToRGB` and 3 `ShaderNodeMix`
    3.  Links nodes to define the custom color ramp workflow.
+
        
+- Related to creation of custom color ramp:
+	- `init_default_colors(self)`: Initializes the default colors and positions for the color pairs.
+	- `create_color_input(self, group, number, panel)`:
+	Creates a f"Color {number}" input of type 'NodeSocketColor' inside the group. 
+	- `create_position_input(self, group, number, panel)`:
+ 	Creates a "Color position {number}" input of type 'NodeSocketFloat' inside the  group
+	- `set_color_pair_input (self, group, number)`:
+	Set the pair of inputs ("Color {number}", "Color position {number}") using f"color_pair_{number}" property
+	- `create_partial_inputs(self, group, texture_panel)`: Function to create inputs of subclasses between scale input and color inputs. This method is intended to be overridden by subclasses for specific texture types.
+	- `create_ramp_inputs(self, group)`: creates inputs for the color ramp group
+	- `create_ramp_outputs(self, group)`: creates outputs for the color ramp group
+	- `create_color_ramps(self, nodes)`: creates 3 `ShaderNodeValToRGB`
+
+   	**Returns:** array of `ShaderNodeValToRGB`
+	-  `create_mix (self, nodes)`: creates 3 `ShaderNodeMix`
+
+    	**Returns:** array of `ShaderNodeMix`
+	- `create_ramp_drivers(self, color_ramps, material)`: creates a driver for 4 different color stops
+	- `link_ramp(self, input_node, output_node, links, color_ramps, mix_nodes)`: Connects  nodes inside the ramp
+
 ---
 
 
