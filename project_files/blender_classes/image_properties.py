@@ -4,8 +4,8 @@ import os
 
 class ImageProperties(TriplanarMappingProperties):
 
-    texture: bpy.props.StringProperty(
-        name = "Texture",
+    image_file: bpy.props.StringProperty(
+        name = "File",
         description = "Texture for x label",
         subtype = 'FILE_PATH')
 
@@ -35,16 +35,16 @@ class ImageProperties(TriplanarMappingProperties):
 
     def create_texture(self, nodes, material):
         texture_node = nodes.new(type='ShaderNodeTexImage')
-        if os.path.isfile(bpy.path.abspath(self.texture)):
+        if os.path.isfile(bpy.path.abspath(self.image_file)):
             try:
-                texture_node.image = bpy.data.images.load(bpy.path.abspath(self.texture))
+                texture_node.image = bpy.data.images.load(bpy.path.abspath(self.image_file))
                 print(f"Loaded texture from {texture_node}")
 
             except Exception as e:
-                print(f"Failed to load texture {self.texture}: {e}. Using default white texture.")
+                print(f"Failed to load texture {self.image_file}: {e}. Using default white texture.")
 
         else:
-            print(f"Warning: Texture file not found at {self.texture}.Using default texture")
+            print(f"Warning: Texture file not found at {self.image_file}.Using default texture")
 
         texture_node.projection = 'BOX'  # Set the projection type to 'BOX'
         texture_node.projection_blend = self.blending
@@ -69,5 +69,5 @@ class ImageProperties(TriplanarMappingProperties):
 
     def reset(self):
         super().reset()
-        self.texture = ""
+        self.image_file = ""
         self.blending = 0.2
