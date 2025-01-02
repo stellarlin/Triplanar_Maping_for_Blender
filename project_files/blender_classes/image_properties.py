@@ -18,16 +18,16 @@ class ImageProperties(TriplanarMappingProperties):
     def create_inputs(self, group, texture_panel):
         super().create_inputs(group, texture_panel)
         group.interface.new_socket(
-            name='Texture Blend',
+            name='Blending',
             in_out='INPUT',
             socket_type='NodeSocketFloat',
             parent = texture_panel
         )
 
-        group.interface.items_tree['Texture Blend'].min_value = 0.0
-        group.interface.items_tree['Texture Blend'].max_value = 1.0
-        group.interface.items_tree['Texture Blend'].subtype = 'FACTOR'
-        group.interface.items_tree['Texture Blend'].default_value = self.blending
+        group.interface.items_tree['Blending'].min_value = 0.0
+        group.interface.items_tree['Blending'].max_value = 1.0
+        group.interface.items_tree['Blending'].subtype = 'FACTOR'
+        group.interface.items_tree['Blending'].default_value = self.blending
 
     def link_nodes(self, links, input_node, mapping_node, texture_node, bsdf_node, color_ramp):
         super().link_nodes(links, input_node, mapping_node, texture_node, bsdf_node, color_ramp)
