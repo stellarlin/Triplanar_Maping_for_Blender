@@ -55,7 +55,9 @@ In the panel, there will be a dropdown menu labeled Type. This is where you can 
 7. Click the 'Apply' button to apply the material to the selected objects.
 8. After applying, modify the material in the `Material Settings > Surface` if needed.
  
+___
 
+## Tutorials 
 #### Apply Image Texture Tutorial:
 
 
@@ -88,7 +90,7 @@ The `texture_type` EnumProperty determines:
 2. **Panel Drawing Logic:** Which UI panel section is drawn in the `TriplanarMappingPanel` to represent the selected texture type's properties.
 3. **Behavior of Operators:** What action is performed when operators like `Apply Planar` or `Clear All` are triggered, ensuring the behavior aligns with the selected texture type.
 
-| **Texture Type** | **Description**                                                                 | **Node Type, created by `create_texture(self, nodes, material)`**              | **Example of Resulting Material**                                      |
+| **Texture Type (`texture_type`)** | **Description**                                                                 | **Node Type, created by `create_texture(self, nodes, material)`**              | **Example of Resulting Material**                                      |
 |-------------------|---------------------------------------------------------------------------------|-----------------------------|------------------------------------------------------------------------|
 | **Image Texture** (`TEX_IMAGE`) | Utilizes an image as the base texture. | `ShaderNodeTexImage`        |  ![Image](Other/Schemes/image.png) |
 | **Noise Texture** (`NOISE`)     | Generates procedural noise, useful for simulating randomness, roughness, or natural patterns.    | `ShaderNodeTexNoise`        | ![Noise](Other/Schemes/noise.png) |    
@@ -114,34 +116,6 @@ bpy.types.Scene.texture_type = bpy.props.EnumProperty(
     default='NONE'
 )
 ```
-
-#### Options
-- NONE (`'-'`)
-  - No texture type is selected.
-  - The add-on does not display any specific property panel or options.
-  
-- TEX_IMAGE (`'Image'`)
-  - Represents properties and settings for Texture Images.
-  - Invokes the `draw_tex_image` function to display UI elements specific to image textures.
-  
-- NOISE (`'Noise'`)
-  - Represents properties for procedural noise textures.
-  - Invokes the `draw_noise` function to display relevant settings like scale, distortion, and roughness.
-  
-- VORONOI (`'Voronoi'`)
-  - Represents properties for Voronoi textures.
-  - Invokes the `draw_voronoi` function to configure attributes like randomness and detail.
-  
-- WAVES (`'Waves'`)
-  - Represents properties for wave patterns.
-  - Invokes the `draw_wave` function to handle configurations for wave type, direction, and distortion.
-  
-- MAGIC (`'Magic'`)
-  - Represents properties for procedural magic textures.
-  - Invokes the `draw_magic` function to allow configurations for scale, depth, and distortion.
-
-
-
 
 ### Inheritance
 This project is designed with modularity in mind, enabling the easy addition of new texture types and properties without requiring significant changes to the existing codebase.
@@ -748,4 +722,52 @@ The `MagicProperties` class is a subclass of `PartialProperties`, designed to ge
   Creates a `ShaderNodeTexMagic` node and sets up a driver for the `turbulence_depth` property. 
 
   **Returns:** The created `ShaderNodeTexMagic` node.
+
+
+### **9. Operator: `ApplyMaterialOperator`**
+
+This operator creates a new material using the selected properties and applies it to all selected objects. The first selected object receives the base material, while all subsequent objects get unique copies of it. Materials are only applied to mesh objects, and existing materials are cleared before new materials are assigned.  
+
+**Operator Properties**:
+- `bl_idname`: `material.apply_planar`
+- `bl_label`: `Apply`
+- `bl_description`: `Create a new material`
+- `bl_options`: `{'REGISTER', 'UNDO'}`
+
+**Operation**:
+1. Fetches the appropriate property set using `choose_properties`.
+2. Check if any objects are selected
+3. Create the base material using create_material()
+4. The operator processes all selected objects in the scene:
+5. For each object, check if object is a mesh. Continue, if it's not.
+6. Assign Base Material to the First Object
+7. Assign a Copy of the Material to Subsequent Objects
+
+---
+
+### **10. Operator: `ResetPropertiesOperator**`**
+
+This operator resets the properties of the selected texture type to their default values.
+
+**Operator Properties**:
+- `bl_idname`: `properties.reset_to_defaults`
+- `bl_label`: `Reset the default properties`
+- `bl_options`: `{'REGISTER', 'UNDO'}`
+
+**Operation**:
+1. Fetches the appropriate property set using `choose_properties`.
+2. Ensures the property set exists; otherwise, displays an error.
+3. Calls the `reset()` method on the property to restore its default state.
+
+
+---
+
+# Sources
+
+1. [Blender 4.3 Python API Documentation](https://docs.blender.org/api/current/index.html)
+2. [ Blender Secrets: Box Mapping](https://www.blendersecrets.org/secrets/blender-secrets-box-mapping)
+3. [PGA: Lections](https://courses.fit.cvut.cz/BI-PGA/lectures/index.html)
+4. [YouTube Tutorial:  Control a ColorRamp Outside of a Node Group](https://www.youtube.com/watch?v=WaDkMP5ruh4)
+5. [Blender Artists Forum](https://blenderartists.org)
+
 
