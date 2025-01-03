@@ -12,7 +12,7 @@
 ---
 ## **Overview**
 
-The Triplanar Texture Mapping Add-On enables Blender users to quickly create and apply procedural triplanar materials to objects. 
+The Triplanar Texture Mapping Add-On enables Blender users to quickly create materials with usage of triplanar mapping of different kind of textures. 
 It simplifies texturing for complex objects, eliminating the need for precise UV mapping.
 The aim is to streamline the creation and manipulation of textures with minimal effort, offering an intuitive interface for users.
 
