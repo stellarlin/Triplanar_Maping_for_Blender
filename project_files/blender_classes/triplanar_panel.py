@@ -11,7 +11,7 @@ class TriplanarMappingPanel(bpy.types.Panel):
     def draw_tex_image(self, layout, prop):
         # Display properties in the UI
         layout.prop(prop, "name")
-        layout.prop(prop, "texture")
+        layout.prop(prop, "image_file")
         layout.prop(prop, "blending")
         self.draw_mapping(layout, prop)
 
@@ -100,5 +100,4 @@ class TriplanarMappingPanel(bpy.types.Panel):
 
         if scene.texture_type != 'NONE':
             layout.operator("material.apply_planar")
-            layout.operator("material.clear_all")
             layout.operator("properties.reset_to_defaults")
