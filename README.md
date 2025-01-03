@@ -89,7 +89,7 @@ The **`PartialProperties`** class introduces the `ShaderNodeGroup` for the custo
 
 *`(All details about texture types, panels, and the implementation of the custom ramp are described in the subsequent Core Classes section).`*
 
-### Properties
+### Material properties
 Properties for each mapping type (available both in the add-on panel and the material nodes) are divided into three main segments:
 
 - **Texture Properties** :
@@ -100,8 +100,80 @@ This segment is universal and helps users control the mapping of textures for se
 An additional group of properties that control the coloring of partially generated materials.  Contains 4 pairs of color value and their position in the Color Ramp
 
 
+###  Enum Property: `texture_type` 
 
-### Illustration
+The `texture_type` EnumProperty is a key feature, enabling the user to select different types of textures and dynamically load the corresponding properties and user interface panels.
+The `texture_type` EnumProperty determines:
+1. **Property Set:** Which property set is loaded and displayed in the UI, enabling the user to configure texture-specific attributes.
+2. **Panel Drawing Logic:** Which UI panel section is drawn in the `TriplanarMappingPanel` to represent the selected texture type's properties.
+3. **Behavior of Operators:** What action is performed when operators like `Apply Planar` or `Clear All` are triggered, ensuring the behavior aligns with the selected texture type.
+
+#### **Definition**
+```python
+bpy.types.Scene.texture_type = bpy.props.EnumProperty(
+    name="Type",
+    description="Choose a type",
+    items=[
+        ('NONE', "-", "No type is selected"),
+        ('TEX_IMAGE', "Image", "Properties for Texture Image"),
+        ('NOISE', "Noise", "Properties for Noise"),
+        ('VORONOI', "Voronoi", "Properties for Voronoi Texture"),
+        ('WAVES', "Waves", "Properties for Wave Texture"),
+        ('MAGIC', "Magic", "Properties for Magic Texture"),
+    ],
+    default='NONE'
+)
+```
+
+#### Options
+- NONE (`'-'`)
+  - No texture type is selected.
+  - The add-on does not display any specific property panel or options.
+  
+- TEX_IMAGE (`'Image'`)
+  - Represents properties and settings for Texture Images.
+  - Invokes the `draw_tex_image` function to display UI elements specific to image textures.
+  
+- NOISE (`'Noise'`)
+  - Represents properties for procedural noise textures.
+  - Invokes the `draw_noise` function to display relevant settings like scale, distortion, and roughness.
+  
+- VORONOI (`'Voronoi'`)
+  - Represents properties for Voronoi textures.
+  - Invokes the `draw_voronoi` function to configure attributes like randomness and detail.
+  
+- WAVES (`'Waves'`)
+  - Represents properties for wave patterns.
+  - Invokes the `draw_wave` function to handle configurations for wave type, direction, and distortion.
+  
+- MAGIC (`'Magic'`)
+  - Represents properties for procedural magic textures.
+  - Invokes the `draw_magic` function to allow configurations for scale, depth, and distortion.
+
+###  Static Function: `choose_properties`
+The choose_properties function is a utility that simplifies the process of selecting the appropriate property set based on the currently selected texture type.
+- Maps the selected `texture_type` to its corresponding property class, ensuring that all subsequent operations (UI rendering, material creation, etc.) use the correct data structure.
+- Centralizes the logic for property selection, avoiding redundant conditional checks in multiple parts of the code.
+- The function is helpful when implementing operators (e.g., apply, reset) that depend on the active texture type.
+
+#### Definition
+
+```
+def choose_properties(context):
+    if context.scene.texture_type == 'TEX_IMAGE':
+        return context.scene.image_properties
+    if context.scene.texture_type == 'NOISE':
+        return context.scene.noise_properties
+    if context.scene.texture_type == 'VORONOI':
+        return context.scene.voronoi_properties
+    if context.scene.texture_type == 'WAVES':
+        return context.scene.wave_properties
+    if context.scene.texture_type == 'MAGIC':
+        return context.scene.magic_properties
+
+```
+___
+### Class Diagram
 The following class diagram demonstrates the relationships and dependencies within the project:
 ```mermaid
 classDiagram
@@ -357,13 +429,80 @@ Provides a default implementation for creating texture nodes. This method is int
 - **`reset(self)`**: Resets all properties to their default values. This method is intended to be overridden by subclasses for specific texture types.
 
 ---
+### 2. `TriplanarMappingPanel`
 
-### 2. `ImageProperties` 
+The `TriplanarMappingPanel` is a custom Blender UI panel implemented using the `bpy.types.Panel` class.The panel is located in the 3D View area under the "Triplanar Mapping Panel" category. The panel dynamically updates its contents based on the selected texture type. Each texture type has its own dedicated UI layout.
+Program determines which helper method to call based on the active texture type (`scene.texture_type`):
+```
+layout.label(text="Create a New Material:")
+layout.prop(scene, "texture_type")
+
+if scene.texture_type == 'TEX_IMAGE':
+    self.draw_tex_image(layout, scene.image_properties)
+elif scene.texture_type == 'NOISE':
+    self.draw_noise(layout, scene.noise_properties)
+elif scene.texture_type == 'VORONOI':
+    self.draw_voronoi(layout, scene.voronoi_properties)
+elif scene.texture_type == 'WAVES':
+    self.draw_wave(layout, scene.wave_properties)
+elif scene.texture_type == 'MAGIC':
+    self.draw_magic(layout, scene.magic_properties)
+```
+#### Panel Illustration 
+|Image  | Noise | Voronoi | Wave| Magic|
+|--|--|--|--|--|
+|   ![Image Panel](Other/Schemes/image_panel.png) |   ![Noise Panel](Other/Schemes/noise_panel.png) |  ![Voronoi Panel](Other/Schemes/voronoi_panel.png) |   ![Wave Panel](Other/Schemes/wave_panel.png)|  ![Magic Panel](Other/Schemes/magic_panel.png)|
+
+
+#### Class Definition
+
+```
+class TriplanarMappingPanel(bpy.types.Panel):
+    bl_label = "Triplanar Mapping"
+    bl_idname = "TRIPLANE_MAPPING_PANEL"
+    bl_space_type = "VIEW_3D"
+    bl_region_type = "UI"
+    bl_category = "Triplanar Mapping Panel"
+```
+
+
+
+#### Methods
+- `draw`(self, context): The draw method is the entry point for rendering the panel UI. It determines the active texture type and delegates rendering to the corresponding helper method.
+
+- Helper Methods for Specific Texture Types:
+	- `draw_tex_image(self, layout, prop)`: Displays properties for image textures. Includes a mapping section
+
+	- `draw_noise(self, layout, prop)`: Displays noise texture properties. 
+
+	- `draw_voronoi(self, layout, prop)` : Displays Voronoi texture propertie. 
+
+	- `draw_wave(self, layout, prop)`: Displays wave texture properties. 
+
+	- `draw_magic(self, layout, prop)`: Displays properties for the magic texture.
+
+	- `draw_colors(self, layout, prop)`: Handles color-position pairs for all texture types that support gradient settings. Displays up to four pairs, each with a color and its associated position.
+
+	- `draw_mapping(self, layout, prop)` : Adds mapping parameters (scale, location, rotation) common to all texture types.
+
+Dynamic Panel Rendering
+
+
+
+#### Operators
+
+- `material.apply_planar`: Applies the configured triplanar mapping of texture.
+
+- `properties.reset_to_defaults`: Resets texture properties to their default values.
+
+
+===
+
+### 3. `ImageProperties` 
 
 The `ImageProperties` class is a specialized subclass of `TriplanarMappingProperties` for handling image-based textures. This class manages the loading, customization, and application of external image files as textures.
-
-![Image Group](Other/Schemes/image_input.png)
-![Image Tree](Other/Schemes/image_tree.png)
+|![Image Group](Other/Schemes/image_input.png)  | ![Image Tree](Other/Schemes/image_tree.png) | 
+|--|--|
 
 
 #### Properties:
@@ -375,7 +514,7 @@ The `ImageProperties` class is a specialized subclass of `TriplanarMappingProper
   Generates the `ShaderNodeTexImage` and configures its parameters using the `texture` and `blending` properties. Creats a driver to manipulate 'Blend' parameter;
   
 ---
-### 3. PartialProperties
+### 4. PartialProperties
 
 `PartialProperties` is a subclass of `TriplanarMappingProperties` designed for generating custom triplanar texture properties with support for partial texture creation. It introduces additional features, including a custom color ramp with up to 4 configurable color-position pairs that is configurable outside the node group
 
@@ -425,11 +564,11 @@ The `ImageProperties` class is a specialized subclass of `TriplanarMappingProper
 	- `link_ramp(self, input_node, output_node, links, color_ramps, mix_nodes)`: Connects  nodes inside the ramp
 
 ---
-### **4. NoiseProperties**
+### **5. NoiseProperties**
 The `NoiseProperties` class is a child of `PartialProperties`, designed to generate procedural noise textures.
 
-![Noise Group](Other/Schemes/noise_input.png)
-![Noise Tree](Other/Schemes/noise_tree.png)
+|![Noise Group](Other/Schemes/noise_input.png)| ![Noise Tree](Other/Schemes/noise_tree.png) | 
+|--|--|
 
 
 #### **Properties**
@@ -457,11 +596,11 @@ The `NoiseProperties` class is a child of `PartialProperties`, designed to gener
   Generates a `ShaderNodeTexNoise` node configured for 3D noise, normalized for consistency, and set to `FBM` type for enhanced pattern variability.
 
 ---
-### **5. VoronoiProperties**
+### **6. VoronoiProperties**
 The `VoronoiProperties` class is a child of `PartialProperties`, designed specifically for creating and managing Voronoi textures. 
 
-![Voronoi Group](Other/Schemes/voronoi_input.png)
-![Voronoi Tree](Other/Schemes/voronoi_tree.png)
+|![Voronoi Group](Other/Schemes/voronoi_input.png) | ![Voronoi Group](Other/Schemes/voronoi_tree.png)) | 
+|--|--|
 
 
 #### **Properties**
@@ -493,11 +632,11 @@ The `VoronoiProperties` class is a child of `PartialProperties`, designed specif
   - Normalized output enabled  
 
 ---
-### **6. WaveProperties**
+### **7. WaveProperties**
 The `WaveProperties` class is an extension of `PartialProperties`, focusing on the generation and management of wave patterns. It provides a  various types, profiles, and directional settings.
 
-![Wave Group](Other/Schemes/wave_inputs.png)
-![Wave Tree](Other/Schemes/wave_tree.png)
+|![Wave Group](Other/Schemes/wave_inputs.png)| ![Wave Tree](Other/Schemes/wave_tree.png)| 
+|--|--|
 
 
 #### **Properties**
@@ -566,12 +705,13 @@ Here is the addition of the `MagicProperties` class in the same manner as the ot
 
 ---
 
-### **7. MagicProperties**
+### **8. MagicProperties**
 
 The `MagicProperties` class is a subclass of `PartialProperties`, designed to generate and manage turbulent, magical noise textures with customizable depth and distortion parameters.
 
-![Magic Group](Other/Schemes/magic_input.png)
-![Magic Tree](Other/Schemes/magic_tree.png)
+|
+![Magic Group](Other/Schemes/magic_input.png)| ![Magic Tree](Other/Schemes/magic_tree.png)| 
+|--|--|
 
 #### **Properties**
 - `Depth`  
