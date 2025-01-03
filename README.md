@@ -599,7 +599,7 @@ The `NoiseProperties` class is a child of `PartialProperties`, designed to gener
 ### **6. VoronoiProperties**
 The `VoronoiProperties` class is a child of `PartialProperties`, designed specifically for creating and managing Voronoi textures. 
 
-|![Voronoi Group](Other/Schemes/voronoi_input.png) | ![Voronoi Group](Other/Schemes/voronoi_tree.png)) | 
+|![Voronoi Group](Other/Schemes/voronoi_input.png) | ![Voronoi Group](Other/Schemes/voronoi_tree.png) | 
 |--|--|
 
 
