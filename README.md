@@ -88,6 +88,16 @@ The `texture_type` EnumProperty determines:
 2. **Panel Drawing Logic:** Which UI panel section is drawn in the `TriplanarMappingPanel` to represent the selected texture type's properties.
 3. **Behavior of Operators:** What action is performed when operators like `Apply Planar` or `Clear All` are triggered, ensuring the behavior aligns with the selected texture type.
 
+| **Texture Type** | **Description**                                                                 | **Node Type, created by `create_texture(self, nodes, material)`**              | **Example of Resulting Material**                                      |
+|-------------------|---------------------------------------------------------------------------------|-----------------------------|------------------------------------------------------------------------|
+| **Image Texture** (`TEX_IMAGE`) | Utilizes an image as the base texture. | `ShaderNodeTexImage`        |  ![Image](Other/Schemes/image.png) |
+| **Noise Texture** (`NOISE`)     | Generates procedural noise, useful for simulating randomness, roughness, or natural patterns.    | `ShaderNodeTexNoise`        | ![Noise](Other/Schemes/noise.png) |    
+| **Voronoi Texture** (`VORONOI`) | Creates cellular patterns often used for organic or crystalline structures.                       | `ShaderNodeTexVoronoi`      | ![Voronoi](Other/Schemes/voronoi.png) |          
+| **Wave Texture** (`WAVES`)      | Produces sine wave patterns in bands or concentric rings for artistic or stylized surfaces.      | `ShaderNodeTexWave`         | ![Wave](Other/Schemes/wave.png) |                   
+| **Magic Texture** (`MAGIC`)     | Generates chaotic, psychedelic patterns with controllable depth for unique effects.              | `ShaderNodeTexMagic`        | ![Magic](Other/Schemes/magic.png) |
+
+
+
 #### **Definition**
 ```python
 bpy.types.Scene.texture_type = bpy.props.EnumProperty(
@@ -105,14 +115,30 @@ bpy.types.Scene.texture_type = bpy.props.EnumProperty(
 )
 ```
 
-
-| **Texture Type** | **Description**                                                                 | **Node Type, created by `create_texture(self, nodes, material)`**              | **Example of Resulting Material**                                      |
-|-------------------|---------------------------------------------------------------------------------|-----------------------------|------------------------------------------------------------------------|
-| **Image Texture** (`TEX_IMAGE`) | Utilizes an image as the base texture. | `ShaderNodeTexImage`        |  ![Image](Other/Schemes/image.png) |
-| **Noise Texture** (`NOISE`)     | Generates procedural noise, useful for simulating randomness, roughness, or natural patterns.    | `ShaderNodeTexNoise`        | ![Noise](Other/Schemes/noise.png) |    
-| **Voronoi Texture** (`VORONOI`) | Creates cellular patterns often used for organic or crystalline structures.                       | `ShaderNodeTexVoronoi`      | ![Voronoi](Other/Schemes/voronoi.png) |          
-| **Wave Texture** (`WAVES`)      | Produces sine wave patterns in bands or concentric rings for artistic or stylized surfaces.      | `ShaderNodeTexWave`         | ![Wave](Other/Schemes/wave.png) |                   
-| **Magic Texture** (`MAGIC`)     | Generates chaotic, psychedelic patterns with controllable depth for unique effects.              | `ShaderNodeTexMagic`        | ![Magic](Other/Schemes/magic.png) |
+#### Options
+- NONE (`'-'`)
+  - No texture type is selected.
+  - The add-on does not display any specific property panel or options.
+  
+- TEX_IMAGE (`'Image'`)
+  - Represents properties and settings for Texture Images.
+  - Invokes the `draw_tex_image` function to display UI elements specific to image textures.
+  
+- NOISE (`'Noise'`)
+  - Represents properties for procedural noise textures.
+  - Invokes the `draw_noise` function to display relevant settings like scale, distortion, and roughness.
+  
+- VORONOI (`'Voronoi'`)
+  - Represents properties for Voronoi textures.
+  - Invokes the `draw_voronoi` function to configure attributes like randomness and detail.
+  
+- WAVES (`'Waves'`)
+  - Represents properties for wave patterns.
+  - Invokes the `draw_wave` function to handle configurations for wave type, direction, and distortion.
+  
+- MAGIC (`'Magic'`)
+  - Represents properties for procedural magic textures.
+  - Invokes the `draw_magic` function to allow configurations for scale, depth, and distortion.
 
 
 
@@ -139,31 +165,6 @@ An additional group of properties that control the coloring of partially generat
 
 
 ---
-
-#### Options
-- NONE (`'-'`)
-  - No texture type is selected.
-  - The add-on does not display any specific property panel or options.
-  
-- TEX_IMAGE (`'Image'`)
-  - Represents properties and settings for Texture Images.
-  - Invokes the `draw_tex_image` function to display UI elements specific to image textures.
-  
-- NOISE (`'Noise'`)
-  - Represents properties for procedural noise textures.
-  - Invokes the `draw_noise` function to display relevant settings like scale, distortion, and roughness.
-  
-- VORONOI (`'Voronoi'`)
-  - Represents properties for Voronoi textures.
-  - Invokes the `draw_voronoi` function to configure attributes like randomness and detail.
-  
-- WAVES (`'Waves'`)
-  - Represents properties for wave patterns.
-  - Invokes the `draw_wave` function to handle configurations for wave type, direction, and distortion.
-  
-- MAGIC (`'Magic'`)
-  - Represents properties for procedural magic textures.
-  - Invokes the `draw_magic` function to allow configurations for scale, depth, and distortion.
 
 ###  Static Function: `choose_properties`
 The choose_properties function is a utility that simplifies the process of selecting the appropriate property set based on the currently selected texture type.
