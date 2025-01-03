@@ -28,21 +28,27 @@ class ApplyMaterialOperator(bpy.types.Operator):
             self.report({'WARNING'}, "No objects selected")
             return {'CANCELLED'}
 
-        material = props.create_material()
+        base_material = props.create_material()
+        first_obj = True  # Flag to track if it's the first object
         for obj in context.selected_objects:
-            if not obj:
-                self.report({'WARNING'}, "No active object selected")
 
             if obj is None or obj.type != 'MESH':
                 self.report({'WARNING'}, "Active object is not a mesh")
                 continue
 
-            if  obj.data.materials:
-                obj.data.materials[0] = material  # Apply to the first slot
-            else:
-                obj.data.materials.append(material)  # Add a new slot if none exists
+            if first_obj:
+                # First object gets the base material directly
+                obj.data.materials.clear()
+                obj.data.materials.append(base_material)
+                first_obj = False
 
-        self.report({'INFO'}, f"Applied {material.name}")
+            else:
+                # For subsequent objects, create a copy of the base material
+                new_material = base_material.copy()
+                obj.data.materials.clear()
+                obj.data.materials.append(new_material)
+
+        self.report({'INFO'}, f"Applied {base_material.name} successfully")
 
         return {"FINISHED"}
 
