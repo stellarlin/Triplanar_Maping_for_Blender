@@ -6,7 +6,7 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
     name: bpy.props.StringProperty(
         name="Name",
         description="Name for the created material",
-        default="DefaultPlanar_Material")  # Default name if no name is provided
+        default="DefaultTriplanar_Material")  # Default name if no name is provided
 
     mapping_scale: bpy.props.FloatVectorProperty(
         name="Mapping Scale",
@@ -177,7 +177,8 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
         return material
 
     def reset(self):
-        # Reset mapping scale property
+
+        self.name = "DefaultTriplanar_Material"
         self.mapping_scale = (0.4, 0.4, 0.4)  # Default value
         self.mapping_location = (0, 0, 0)
         self.mapping_rotation = (0, 0, 0)
