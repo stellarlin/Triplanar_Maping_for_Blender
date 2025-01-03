@@ -70,37 +70,17 @@ In the panel, there will be a dropdown menu labeled Type. This is where you can 
 ---
 # Technical Documentation 
 
-## Core Principles 
 The types of materials that can be mapped using this add-on are grouped into two main categories:
 
  - **Partially Generated Textures**:
 Includes procedural textures such as Noise, Wave, Voronoi, and Magic textures.
-- **Image Textures**:
+- **Image Texture**:
 Use external images as the texture source.
 
 The implementation for both categories is similar at the `ShaderNodeTree` level. The main difference lies in the use of the `CustomRamp`, which provides advanced coloring options for partially generated textures. This design decision led to the use of inheritance for organizing code effectively.
 
 
-### Inheritance
-This project is designed with modularity in mind, enabling the easy addition of new texture types and properties without requiring significant changes to the existing codebase.
-
-The **`TriplanarMappingProperties`** class provides the foundational structure for the material node tree. Its child classes define specific texture nodes and their inputs, create necessary drivers, and establish connections between inputs and nodes.
-The **`PartialProperties`** class introduces the `ShaderNodeGroup` for the custom ramp, which is essential for all its child classes (e.g., Noise, Wave).
-
-*`(All details about texture types, panels, and the implementation of the custom ramp are described in the subsequent Core Classes section).`*
-
-### Material properties
-Properties for each mapping type (available both in the add-on panel and the material nodes) are divided into three main segments:
-
-- **Texture Properties** :
-These store parameters specific to the texture type, such as scale, detail, roughness, etc. This segment is unique to each texture type.
-- **Mapping Properties**:
-This segment is universal and helps users control the mapping of textures for seamless transitions across surfaces.
-- **Color Properties**:
-An additional group of properties that control the coloring of partially generated materials.  Contains 4 pairs of color value and their position in the Color Ramp
-
-
-###  Enum Property: `texture_type` 
+###  Texture Types
 
 The `texture_type` EnumProperty is a key feature, enabling the user to select different types of textures and dynamically load the corresponding properties and user interface panels.
 The `texture_type` EnumProperty determines:
@@ -124,6 +104,41 @@ bpy.types.Scene.texture_type = bpy.props.EnumProperty(
     default='NONE'
 )
 ```
+
+
+| **Texture Type** | **Description**                                                                 | **Node Type, created by `create_texture(self, nodes, material)`**              | **Example of Resulting Material**                                      |
+|-------------------|---------------------------------------------------------------------------------|-----------------------------|------------------------------------------------------------------------|
+| **Image Texture** (`TEX_IMAGE`) | Utilizes an image as the base texture. | `ShaderNodeTexImage`        |  ![Image](Other/Schemes/image.png) |
+| **Noise Texture** (`NOISE`)     | Generates procedural noise, useful for simulating randomness, roughness, or natural patterns.    | `ShaderNodeTexNoise`        | ![Noise](Other/Schemes/noise.png) |    
+| **Voronoi Texture** (`VORONOI`) | Creates cellular patterns often used for organic or crystalline structures.                       | `ShaderNodeTexVoronoi`      | ![Voronoi](Other/Schemes/voronoi.png) |          
+| **Wave Texture** (`WAVES`)      | Produces sine wave patterns in bands or concentric rings for artistic or stylized surfaces.      | `ShaderNodeTexWave`         | ![Wave](Other/Schemes/wave.png) |                   
+| **Magic Texture** (`MAGIC`)     | Generates chaotic, psychedelic patterns with controllable depth for unique effects.              | `ShaderNodeTexMagic`        | ![Magic](Other/Schemes/magic.png) |
+
+
+
+
+### Inheritance
+This project is designed with modularity in mind, enabling the easy addition of new texture types and properties without requiring significant changes to the existing codebase.
+
+The **`TriplanarMappingProperties`** class provides the foundational structure for the material node tree. Its child classes define specific texture nodes and their inputs, create necessary drivers, and establish connections between inputs and nodes.
+The **`PartialProperties`** class introduces the `ShaderNodeGroup` for the custom ramp, which is essential for all its child classes (e.g., Noise, Wave).
+
+*`(All details about texture properties, panels, and the implementation of the custom ramp are described in the subsequent Core Classes section).`*
+
+
+### Material properties
+Properties for each mapping type (available both in the add-on panel and the material nodes) are divided into three main segments:
+
+- **Texture Properties** :
+These store parameters specific to the texture type, such as scale, detail, roughness, etc. This segment is unique to each texture type.
+- **Mapping Properties**:
+This segment is universal and helps users control the mapping of textures for seamless transitions across surfaces.
+- **Color Properties**:
+An additional group of properties that control the coloring of partially generated materials.  Contains 4 pairs of color value and their position in the Color Ramp
+
+
+
+---
 
 #### Options
 - NONE (`'-'`)
