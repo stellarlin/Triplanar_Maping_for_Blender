@@ -114,7 +114,7 @@ class TriplanarMappingProperties(bpy.types.PropertyGroup):
         # Add outputs
         self.create_outputs(node_group)
         output_node = nodes.new(type='NodeGroupOutput')
-        output_node.location = (1100, 0)
+        output_node.location = (1300, 0)
 
         # Add the necessary node
         # TextureCoordinate
