@@ -28,6 +28,7 @@ The aim is to streamline the creation and manipulation of textures with minimal 
 - Reset settings to defaults with one click.
 - Fully integrated with Blender's material system.
 
+ ![Example Screenshot](Other/Schemes/render.png)
 ---
 
 ## **Getting Started**
@@ -54,7 +55,7 @@ In the panel, there will be a dropdown menu labeled Type. This is where you can 
 5. Adjust the material settings to your preference or reset settings to defaults.
 7. Click the 'Apply' button to apply the material to the selected objects.
 8. After applying, modify the material in the `Material Settings > Surface` if needed.
- 
+
 ___
 
 ## Tutorials 
@@ -71,6 +72,7 @@ ___
 ####  Apply Magic Texture Tutorial:
 ---
 # Technical Documentation 
+
 
 The types of materials that can be mapped using this add-on are grouped into two main categories:
 
