@@ -24,7 +24,7 @@ class PartialProperties(TriplanarMappingProperties):
         description ="Scale of the texture",
         min = -1000,  # Minimum allowed value
         max = 1000,  # Maximum allowed value
-        default = 30
+        default = 15
     )
 
     color_pair_1: bpy.props.PointerProperty(type=ColorPositionPair)
@@ -135,7 +135,7 @@ class PartialProperties(TriplanarMappingProperties):
         y_offset = 200
         for i in range(3):
             color_ramp = nodes.new(type="ShaderNodeValToRGB")
-            color_ramp.location = (200, 200 - i *200)
+            color_ramp.location = (200, 200 - i *350)
             color_ramp.color_ramp.elements[0].color = (0, 0, 0, 1)  # Black
             color_ramp.color_ramp.elements[1].color = (1, 1, 1, 1)  # White
             color_ramps.append(color_ramp)
@@ -149,30 +149,36 @@ class PartialProperties(TriplanarMappingProperties):
             mix_node.blend_type = 'MIX'
             mix_node.data_type = 'RGBA'
             mix_node.clamp_factor = True
-            mix_node.location = (400 + i * 200, 0)
+            mix_node.location = (600 + i * 200, 0)
             mix_nodes.append(mix_node)
         return mix_nodes
 
+
+    def create_color_position_driver(self, pin, position, material):
+        # Create a driver for the pin's position
+        driver = pin.driver_add("position").driver  # Add a driver for the 'position' property
+        # Set up the driver type and target
+        driver.type = 'SUM'
+        var = driver.variables.new()
+        var.name = "pos"  # Name of the driver variable
+        var.type = 'SINGLE_PROP'
+
+        # Target the Value node's output (node output or specific property)
+        var.targets[0].id_type = 'MATERIAL'
+        var.targets[0].id = material  # The Value node is the driver source
+        var.targets[0].data_path = \
+            f"node_tree.nodes[\"Group\"].inputs[\"Color position {position}\"].default_value"  # The value input/output property
+
     def create_ramp_drivers(self, color_ramps, material):
-        for i in range(1, 5):
-            if i == 4:
-                pin = color_ramps[i - 2].color_ramp.elements[1]
-            else:
-                pin = color_ramps[i - 1].color_ramp.elements[0]
 
+        #black pins
+        for i in range(1, 4):
+            self.create_color_position_driver( color_ramps[i - 1].color_ramp.elements[0], i, material)
 
-            # Create a driver for the pin's position
-            driver = pin.driver_add("position").driver  # Add a driver for the 'position' property
-            # Set up the driver type and target
-            driver.type = 'SUM'
-            var = driver.variables.new()
-            var.name = "pos"  # Name of the driver variable
-            var.type = 'SINGLE_PROP'
+        #white pins
+        for i in range(2, 5):
+            self.create_color_position_driver(color_ramps[i - 2].color_ramp.elements[1], i, material)
 
-            # Target the Value node's output (node output or specific property)
-            var.targets[0].id_type = 'MATERIAL'
-            var.targets[0].id = material  # The Value node is the driver source
-            var.targets[0].data_path = f"node_tree.nodes[\"Group\"].inputs[\"Color position {i}\"].default_value"  # The value input/output property
 
     def link_ramp(self, input_node, output_node, links, color_ramps, mix_nodes):
         # Connect the color ramps and MixRGB nodes
@@ -219,7 +225,7 @@ class PartialProperties(TriplanarMappingProperties):
         # create outputs
         self.create_ramp_outputs(node_group)
         output_node = node_group.nodes.new("NodeGroupOutput")
-        output_node.location = (1100, 0)
+        output_node.location = (1300, 0)
 
         # Create four color ramp nodes
         color_ramps = self.create_color_ramps(nodes)
@@ -231,7 +237,7 @@ class PartialProperties(TriplanarMappingProperties):
 
     def reset(self):
         super().reset()
-        self.scale = 30
+        self.scale = 15
         self.init_default_colors()
 
         return
