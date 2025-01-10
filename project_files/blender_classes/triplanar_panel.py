@@ -66,6 +66,9 @@ class TriplanarMappingPanel(bpy.types.Panel):
         layout.prop(prop, "wave_profile")
         layout.prop(prop, "scale")
         layout.prop(prop, "distortion")
+        layout.prop(prop, "detail")
+        layout.prop(prop, "detail_scale")
+        layout.prop(prop, "detail_roughness")
 
         self.draw_colors(layout, prop)
         self.draw_mapping(layout, prop)
@@ -75,6 +78,7 @@ class TriplanarMappingPanel(bpy.types.Panel):
         layout.prop(prop, "depth")
         layout.prop(prop, "scale")
         layout.prop(prop, "distortion")
+
 
         self.draw_colors(layout, prop)
         self.draw_mapping(layout, prop)
