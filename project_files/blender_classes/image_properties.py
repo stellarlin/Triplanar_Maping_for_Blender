@@ -63,7 +63,7 @@ class ImageProperties(TriplanarMappingProperties):
         # Target the Value node's output (node output or specific property)
         var.targets[0].id_type = 'MATERIAL'
         var.targets[0].id = material  # The Value node is the driver source
-        var.targets[0].data_path = "node_tree.nodes[\"Group\"].inputs[\"Texture Blend\"].default_value"  # The value input/output property
+        var.targets[0].data_path = "node_tree.nodes[\"Group\"].inputs[\"Blending\"].default_value"  # The value input/output property
 
         return texture_node
 
