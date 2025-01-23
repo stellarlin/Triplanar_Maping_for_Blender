@@ -73,7 +73,18 @@ ___
 ---
 # Technical Documentation 
 
+Triplanar mapping applies textures by blending three planar projections along the X, Y, and Z axes. The blending function prevents visible seams and ensures a smooth transition between projections. The implementation follows these steps:
 
+1. Compute world-space coordinates.
+
+2. Project the texture along each primary axis.
+
+3. Blend the projections based on surface normal influence.
+
+4. Output the final shader network for rendering.
+
+
+###  Texture Types
 The types of materials that can be mapped using this add-on are grouped into two main categories:
 
  - **Partially Generated Textures**:
@@ -82,9 +93,6 @@ Includes procedural textures such as Noise, Wave, Voronoi, and Magic textures.
 Use external images as the texture source.
 
 The implementation for both categories is similar at the `ShaderNodeTree` level. The main difference lies in the use of the `CustomRamp`, which provides advanced coloring options for partially generated textures. This design decision led to the use of inheritance for organizing code effectively.
-
-
-###  Texture Types
 
 The `texture_type` EnumProperty is a key feature, enabling the user to select different types of textures and dynamically load the corresponding properties and user interface panels.
 The `texture_type` EnumProperty determines:
